@@ -200,7 +200,7 @@ const Main: React.FC = () => {
         />
       </nav>
       {/* center  */}
-      <header className="max-w-[900px] m-auto h-[700px]">
+      <header className="max-w-[900px] m-auto h-[800px]">
         <div className="text-white flex flex-col gap-12 h-screen max-h-[800px]  overflow-auto px-6 scroll-smooth section">
           {conversation.length === 0 ? (
             <>
