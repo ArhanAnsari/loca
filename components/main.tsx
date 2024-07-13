@@ -103,7 +103,7 @@ const Main: React.FC = () => {
     setIsLoading(true);
 
     const retryCount = 3;
-    const baseTimeout = 20000; // 20 seconds
+    const baseTimeout = 40000; // 20 seconds
 
     for (let attempt = 0; attempt < retryCount; attempt++) {
       try {
@@ -252,7 +252,7 @@ const Main: React.FC = () => {
             onChange={(e) => setUserMessage(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
             className="w-full max-w-4xl rounded-full h-16 bg-[#1e1f20] text-[#ccc] p-2 px-4 outline-none cursor-text text-md"
-            placeholder={`Hey ${user?.displayName}, looking for local service provider?`}
+            placeholder={`looking for local service provider?`}
           />
           {/* <PlusIcon className="absolute text-[#ccc] left-8 bottom-4 cursor-pointer"/> */}
           <SendHorizontalIcon
