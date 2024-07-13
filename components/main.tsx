@@ -12,6 +12,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import axios from "axios";
 import Link from "next/link";
 import { SkeletonCard } from "./loading";
+import FirstVisitPopup from "./firstvisitpopup";
 
 interface Location {
   latitude: number | null;
@@ -186,6 +187,7 @@ const Main: React.FC = () => {
 
   return (
     <main className="lg:p-4 flex-1 overflow-auto relative">
+       <FirstVisitPopup />
       {/* navbar */}
       <nav className="flex justify-between sticky p-4">
         <span className="text-[#caccce] font-medium text-3xl">Loca</span>
@@ -249,7 +251,7 @@ const Main: React.FC = () => {
             value={userMessage}
             onChange={(e) => setUserMessage(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-            className="w-full max-w-4xl rounded-full h-16 bg-[#1e1f20] text-[#ccc] p-2 px-4 outline-none xs:hidden cursor-text"
+            className="w-full max-w-4xl rounded-full h-16 bg-[#1e1f20] text-[#ccc] p-2 px-4 outline-none cursor-text text-md"
             placeholder={`Hey ${user?.displayName}, looking for local service provider?`}
           />
           {/* <PlusIcon className="absolute text-[#ccc] left-8 bottom-4 cursor-pointer"/> */}
@@ -290,7 +292,7 @@ const CardCarousel = () => {
   const robotText = `Hi ${user?.displayName}, Yes! I found a great one nearby. Check it out and book now.`;
   return (
     <div className="flex gap-12 items-center">
-      <div className="relative  bg-[#34343677] w-full max-w-[30rem] h-80">
+      <div className="relative  bg-[#34343677] w-full max-w-[30rem] h-[21rem]">
         <div className=" p-4 rounded-lg">
           <div className="flex gap-2">
             <Image
