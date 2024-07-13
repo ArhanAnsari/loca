@@ -50,8 +50,8 @@ export default function HomePage() {
   return (
     <section className="bg-[#131314]  w-full flex flex-col justify-center">
       <Navbar />
-      <header className="p-5 lg:p-5 lg:p-auto flex flex-col lg:flex-row justify-around items-center  h-[52rem] ">
-      <div className="relative lg:hidden block bg-[#34343677] w-full max-w-[30rem] h-80">
+      <header className="p-5 lg:p-5 lg:p-auto flex flex-col lg:flex-row justify-around items-center  h-[55rem] ">
+      <div className="relative lg:hidden block bg-[#34343677] w-full max-w-[30rem] h-[21rem]">
           <div className=" p-4 rounded-lg">
             <div className="flex gap-2">
               <Image
