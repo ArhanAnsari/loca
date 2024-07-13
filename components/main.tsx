@@ -11,15 +11,6 @@ import { SendHorizontalIcon, LogOut, PlusIcon } from "lucide-react";
 import { onAuthStateChanged } from "firebase/auth";
 import axios from "axios";
 import Link from "next/link";
-import { ScrollArea, ScrollBar } from "./ui/scroll-area";
-import Autoplay from "embla-carousel-autoplay";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { SkeletonCard } from "./loading";
 
 interface Location {
