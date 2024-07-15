@@ -8,13 +8,13 @@ import {
 
 // Initialize Vertex AI with your Cloud project and location
 const vertexAI = new VertexAI({
-  project: process.env.GCP_PROJECT_ID,
+  project: "loca-bc18e",
   location: 'us-central1',
 });
 
 // Function to get local services from Google Places API
 async function getLocalServices(query: string, latitude: string, longitude: string) {
-  const apiKey = process.env.GOOGLE_PLACE_API;
+  const apiKey = "AIzaSyC1BX6Wcgrp6jibvldv2QJbEAyRzdWKWkc";
   
   if (!apiKey) {
     console.error('Google Places API key is not set');
