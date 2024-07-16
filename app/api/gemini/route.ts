@@ -33,6 +33,8 @@ async function getLocalServices(query: string, latitude: string, longitude: stri
       timeout: 5000, // Reduced timeout for faster failure
     });
 
+    console.log(response)
+
     if (response.data.status === 'REQUEST_DENIED') {
       console.error('Google Places API request denied:', response.data.error_message);
       throw new Error(`Google Places API request denied: ${response.data.error_message}`);
@@ -90,7 +92,7 @@ export async function POST(req: NextRequest) {
       ],
     });
 
-    console.log('Fetching local services');
+    console.log(chat + 'Fetching local services');
     let services;
     try {
       services = await getLocalServices(userMessage, latitude, longitude);
@@ -99,7 +101,7 @@ export async function POST(req: NextRequest) {
       console.error('Error fetching local services:', error);
       services = [];
     }
-
+     console.log(services)
     console.log('Sending message to Vertex AI');
     const contextMessage = `You are to act as a loca an AI local service finder build by devben.  User is looking for local services: "${userMessage}". ${
       services.length > 0 
@@ -108,11 +110,12 @@ export async function POST(req: NextRequest) {
     }`;
 
     const result = await chat.sendMessage(contextMessage);
+    console.log(result)
     const response = await result.response;
     console.log('Received response from Vertex AI');
 
     const vertexResponseText = response.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from Vertex AI';
-
+   console.log(vertexResponseText)
     return NextResponse.json({
       vertexResponse: vertexResponseText,
       services
