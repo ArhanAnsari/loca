@@ -5,5 +5,7 @@
         "Loca",
         "Superjson",
         "vertexai"
-    ]
+    ],
+    "IDX.aI.enableInlineCompletion": true,
+    "IDX.aI.enableCodebaseIndexing": true
 }
