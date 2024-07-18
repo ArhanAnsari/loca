@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
     }, { status: 200 });
   } catch (error: any) {
     console.error('Server Error:', error.message);
-    let errorMessage = 'Something went wrong on the server';
+    let errorMessage = error.message;
     let statusCode = 500;
     if (error.message.includes('Google Places API Error')) {
       errorMessage = 'Error fetching local services. Please try again later.';
