@@ -1,11 +1,12 @@
 // pages/api/debug.ts
+import { NextRequest, NextResponse } from "next/server";
 
-import { NextApiRequest, NextApiResponse } from 'next';
-
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  res.status(200).json({
-    PROJECT_ID: process.env.PROJECT_ID,
-    GOOGLE_CLOUD_CLIENT_EMAIL: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
-    GOOGLE_CLOUD_PRIVATE_KEY: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.substring(0, 10) + '...',
-  });
+export async function POST(req: NextRequest, res: NextResponse) {
+    const test = {
+        PROJECT_ID: process.env.PROJECT_ID,
+        GOOGLE_CLOUD_CLIENT_EMAIL: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
+        GOOGLE_CLOUD_PRIVATE_KEY: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.substring(0, 10) + '...',
+      }
+    return NextResponse.json({debug:test}, {status: 200})
+    
 }
