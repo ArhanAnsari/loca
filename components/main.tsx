@@ -187,7 +187,7 @@ const Main: React.FC = () => {
 
   return (
     <main className="lg:p-4 flex-1 overflow-auto relative">
-       <FirstVisitPopup />
+      <FirstVisitPopup />
       {/* navbar */}
       <nav className="flex justify-between sticky p-4">
         <span className="text-[#caccce] font-medium text-3xl">Loca</span>
@@ -233,33 +233,35 @@ const Main: React.FC = () => {
           {isLoading && <SkeletonCard />}
         </div>
         {/* footer */}
-        <div className="w-full lg:max-w-4xl xs:max-w-[25rem] sm:max-w-[35rem] p-5 fixed bottom-0 bg-black">
-          {locationError && (
-            <div className="mb-2">
-              <p className="text-red-500 mb-1">{locationError}</p>
-              <input
-                type="text"
-                value={manualLocation}
-                onChange={(e) => setManualLocation(e.target.value)}
-                className="w-full max-w-4xl rounded-full h-10 bg-[#1e1f20] text-[#ccc] p-2 px-4 outline-none"
-                placeholder="Enter your full location "
-              />
-            </div>
-          )}
-          <input
-            type="text"
-            value={userMessage}
-            onChange={(e) => setUserMessage(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-            className="w-full max-w-4xl rounded-full h-16 bg-[#1e1f20] text-[#ccc] p-2 px-4 outline-none cursor-text text-md"
-            placeholder={`looking for local service provider?`}
-          />
-          {/* <PlusIcon className="absolute text-[#ccc] left-8 bottom-4 cursor-pointer"/> */}
-          <SendHorizontalIcon
-            className="absolute text-[#ccc] right-9 bottom-10 cursor-pointer"
-            onClick={handleSendMessage}
-          />
-        </div>
+        <section className="fixed bottom-5 left-1/2 z-30 w-full lg:hidden md:hidden -translate-x-1/2 transform animate-fade-slide-up  transition-all duration-300  lg:max-w-4xl xs:max-w-[25rem] sm:max-w-[35rem] p-5 ">
+          <div className=" rounded-lg  py-4 w-full max-w-96 m-auto ">
+            {locationError && (
+              <div className="mb-2">
+                <p className="text-red-500 mb-1">{locationError}</p>
+                <input
+                  type="text"
+                  value={manualLocation}
+                  onChange={(e) => setManualLocation(e.target.value)}
+                  className="w-full max-w-4xl rounded-full h-10 bg-[#1e1f20] text-[#ccc] p-2 px-4 outline-none"
+                  placeholder="Enter your full location "
+                />
+              </div>
+            )}
+            <input
+              type="text"
+              value={userMessage}
+              onChange={(e) => setUserMessage(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+              className="w-full max-w-4xl rounded-full h-16 bg-[#1e1f20] text-[#ccc] p-2 px-4 outline-none cursor-text text-md"
+              placeholder={`looking for local service provider?`}
+            />
+            {/* <PlusIcon className="absolute text-[#ccc] left-8 bottom-4 cursor-pointer"/> */}
+            <SendHorizontalIcon
+              className="absolute text-[#ccc] right-9 bottom-10 cursor-pointer"
+              onClick={handleSendMessage}
+            />
+          </div>
+        </section>
       </header>
       <div
         className="flex gap-2 cursor-pointer absolute top-6 right-28 text-[#ccc] lg:hidden"
