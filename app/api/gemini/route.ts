@@ -6,16 +6,30 @@ import {
   HarmBlockThreshold,
 } from '@google-cloud/vertexai';
 
-// Initialize Vertex AI with your Cloud project and location
-const vertexAI = new VertexAI({
-  project: "loca-bc18e",
-  location: 'us-central1',
+// Function to initialize Vertex AI with JSON credentials
+function initializeVertexAI() {
+  const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
   
-});
+  if (!credentialsJson) {
+    throw new Error('GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable is not set');
+  }
+
+  try {
+    const credentials = JSON.parse(credentialsJson);
+    return new VertexAI({
+      project: credentials.project_id,
+      location: 'us-central1',
+      googleAuthOptions:credentials
+    });
+  } catch (error) {
+    console.error('Error parsing GOOGLE_APPLICATION_CREDENTIALS_JSON:', error);
+    throw new Error('Invalid GOOGLE_APPLICATION_CREDENTIALS_JSON');
+  }
+}
 
 // Function to get local services from Google Places API
 async function getLocalServices(query: string, latitude: string, longitude: string) {
-  const apiKey = "AIzaSyC1BX6Wcgrp6jibvldv2QJbEAyRzdWKWkc";
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   
   if (!apiKey) {
     console.error('Google Places API key is not set');
@@ -33,8 +47,6 @@ async function getLocalServices(query: string, latitude: string, longitude: stri
       },
       timeout: 5000, // Reduced timeout for faster failure
     });
-
-    console.log(response)
 
     if (response.data.status === 'REQUEST_DENIED') {
       console.error('Google Places API request denied:', response.data.error_message);
@@ -66,6 +78,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const vertexAI = initializeVertexAI();
     const model = vertexAI.getGenerativeModel({ model: 'gemini-1.5-pro-001' });
     const chat = model.startChat({
       generationConfig: {
@@ -93,7 +106,7 @@ export async function POST(req: NextRequest) {
       ],
     });
 
-    console.log(chat + 'Fetching local services');
+    console.log('Fetching local services');
     let services;
     try {
       services = await getLocalServices(userMessage, latitude, longitude);
@@ -102,34 +115,32 @@ export async function POST(req: NextRequest) {
       console.error('Error fetching local services:', error);
       services = [];
     }
-     console.log(services)
+
     console.log('Sending message to Vertex AI');
-    const contextMessage = `You are to act as a loca an AI local service finder build by devben.  User is looking for local services: "${userMessage}". ${
+    const contextMessage = `You are to act as a loca an AI local service finder build by devben. User is looking for local services: "${userMessage}". ${
       services.length > 0 
-        ? `Here are some available services: ${JSON.stringify(services)}. Please provide a helpful response based on this information, highlighting and bold the best options based on ratings and number of reviews. and If ${userMessage} don&amp;t sound like they are looking for local service respond casually for example text like "hello what can you do" you knew you had to reply casually `
+        ? `Here are some available services: ${JSON.stringify(services)}. Please provide a helpful response based on this information, highlighting and bold the best options based on ratings and number of reviews. If "${userMessage}" doesn't sound like they are looking for local service respond casually for example text like "hello what can you do" you knew you had to reply casually`
         : `Unfortunately, we couldn't find any local services matching the query. Please provide a general response about ${userMessage} and suggest how the user might find local services.`
     }`;
 
     const result = await chat.sendMessage(contextMessage);
-    console.log(result)
-    const response = await result.response;
     console.log('Received response from Vertex AI');
 
-    const vertexResponseText = response.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from Vertex AI';
-   console.log(vertexResponseText)
+    const vertexResponseText = result.response?.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from Vertex AI';
+
     return NextResponse.json({
       vertexResponse: vertexResponseText,
       services
     }, { status: 200 });
   } catch (error: any) {
     console.error('Server Error:', error.message);
-    let errorMessage = error.message;
+    let errorMessage = 'Something went wrong on the server';
     let statusCode = 500;
     if (error.message.includes('Google Places API Error')) {
       errorMessage = 'Error fetching local services. Please try again later.';
       statusCode = 503; // Service Unavailable
-    } else if (error.message.includes('Vertex AI')) {
-      errorMessage = 'Error communicating with AI service. Please try again later.';
+    } else if (error.message.includes('Vertex AI') || error.message.includes('GOOGLE_APPLICATION_CREDENTIALS_JSON')) {
+      errorMessage = 'Error communicating with AI service. Please check the configuration and try again later.';
       statusCode = 503;
     }
     return NextResponse.json({ error: errorMessage }, { status: statusCode });
