@@ -10,6 +10,7 @@ import {
 const vertexAI = new VertexAI({
   project: "loca-bc18e",
   location: 'us-central1',
+  
 });
 
 // Function to get local services from Google Places API
@@ -122,7 +123,7 @@ export async function POST(req: NextRequest) {
     }, { status: 200 });
   } catch (error: any) {
     console.error('Server Error:', error.message);
-    let errorMessage = 'An unexpected error occurred';
+    let errorMessage = 'Something went wrong on the server';
     let statusCode = 500;
     if (error.message.includes('Google Places API Error')) {
       errorMessage = 'Error fetching local services. Please try again later.';
