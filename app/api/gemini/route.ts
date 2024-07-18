@@ -7,26 +7,25 @@ import {
 } from "@google-cloud/vertexai";
 
 // I import google cloud services credential from here 
-import C from "@/lib/c"
 
 // Function to initialize Vertex AI with JSON credentials
 function initializeVertexAI() {
-  // const credentialsJsons = C
+  const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON 
 
-  // const credentialsJson = JSON.stringify(credentialsJsons)
 
-  // if (!credentialsJson) {
-  //   throw new Error(
-  //     "GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable is not set"
-  //   );
-  // }
+  if (!credentialsJson) {
+    throw new Error(
+      "GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable is not set"
+    );
+  }
 
   try {
-    // const credentials = JSON.parse(credentialsJson);
+    const credentials = JSON.parse(credentialsJson);
     return new VertexAI({
       project: process.env.PROJECT_ID,
       location: "us-central1",
-      // googleAuthOptions: credentials,
+      googleAuthOptions: credentials,
+      // apiEndpoint: credentials
     });
   } catch (error) {
     console.error("Error parsing GOOGLE_APPLICATION_CREDENTIALS_JSON:", error);
@@ -164,7 +163,7 @@ export async function POST(req: NextRequest) {
       { status: 200 }
     );
   } catch (error: any) {
-    console.error("Server Error:", error.message);
+    console.error("Server Error:", JSON.stringify(error, null, 2), error);
     let errorMessage = `Something went wrong on the server ${error.message}`;
     let statusCode = 500;
     if (error.message.includes("Google Places API Error")) {
