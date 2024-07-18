@@ -64,7 +64,7 @@ const Main: React.FC = () => {
             setLocationError(null);
           },
           (error) => {
-            console.error("Error getting geolocation:", error);
+            console.error("Error getting geolocation:", error.message);
             setLocationError(
               `Unable to get your location. Please ensure location services are enabled.`
             );
@@ -122,6 +122,7 @@ const Main: React.FC = () => {
 
         const data = response.data;
         if (data.error) {
+          console.log(data.error)
           throw new Error(data.error);
         }
 
@@ -160,7 +161,7 @@ const Main: React.FC = () => {
         setIsLoading(false);
         return; // Success, exit the retry loop
       } catch (error: any) {
-        console.error(`Error sending message (attempt ${attempt + 1}):`, error);
+        console.error(`Error sending message (attempt ${attempt + 1}):`, error.message);
 
         if (attempt === retryCount - 1) {
           // This was the last attempt
@@ -168,7 +169,7 @@ const Main: React.FC = () => {
             "Sorry, an error occurred while processing your request.";
           if (axios.isAxiosError(error) && error.code === "ECONNABORTED") {
             errorMessage =
-              "The request is taking longer than expected. Please try again later.";
+              `The request is taking longer than expected. Please try again later., ${axios.isAxiosError(error), error.message}`;
           }
           setConversation([
             ...newConversation,
