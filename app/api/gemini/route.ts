@@ -10,25 +10,30 @@ import {
 
 // Function to initialize Vertex AI with JSON credentials
 function initializeVertexAI() {
-  const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON 
+  // const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON 
 
 
-  if (!credentialsJson) {
-    throw new Error(
-      "GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable is not set"
-    );
-  }
+  // if (!credentialsJson) {
+  //   throw new Error(
+  //     "GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable is not set"
+  //   );
+  // }
 
-  console.log("Credentials JSON type:", typeof credentialsJson);
-  console.log("Credentials JSON first 100 characters:", credentialsJson.substring(0, 100));
+  // console.log("Credentials JSON type:", typeof credentialsJson);
+  // console.log("Credentials JSON first 100 characters:", credentialsJson.substring(0, 100));
+  const credentials = {
+    project_id: process.env.PROJECT_ID,
+    client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
+    private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+  };
 
   try {
-    const credentials = JSON.parse(credentialsJson);
+ 
     console.log("Parsed credentials project_id:", credentials.project_id);
     return new VertexAI({
       project: process.env.PROJECT_ID,
       location: "us-central1",
-      googleAuthOptions: credentials,
+      googleAuthOptions: JSON.parse(JSON.stringify(credentials)),
       // apiEndpoint: credentials
     });
   } catch (error: any) {
