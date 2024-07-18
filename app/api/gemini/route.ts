@@ -17,11 +17,9 @@ function initializeVertexAI() {
   try {
     const credentials = JSON.parse(credentialsJson);
     return new VertexAI({
-      // use google auth project Id to run locally 
       project: credentials.project_id,
       location: 'us-central1',
-      // uncomment the code below to run it on server
-      // googleAuthOptions:credentials
+      googleAuthOptions:credentials
     });
   } catch (error) {
     console.error('Error parsing GOOGLE_APPLICATION_CREDENTIALS_JSON:', error);
