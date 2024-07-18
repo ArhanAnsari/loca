@@ -6,26 +6,27 @@ import {
   HarmBlockThreshold,
 } from "@google-cloud/vertexai";
 
+// I import google cloud services credential from here 
 import C from "@/lib/c"
 
 // Function to initialize Vertex AI with JSON credentials
 function initializeVertexAI() {
-  const credentialsJsons = C
+  // const credentialsJsons = C
 
-  const credentialsJson = JSON.stringify(credentialsJsons)
+  // const credentialsJson = JSON.stringify(credentialsJsons)
 
-  if (!credentialsJson) {
-    throw new Error(
-      "GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable is not set"
-    );
-  }
+  // if (!credentialsJson) {
+  //   throw new Error(
+  //     "GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable is not set"
+  //   );
+  // }
 
   try {
-    const credentials = JSON.parse(credentialsJson);
+    // const credentials = JSON.parse(credentialsJson);
     return new VertexAI({
-      project: credentials.project_id,
+      project: process.env.PROJECT_ID,
       location: "us-central1",
-      googleAuthOptions: credentials,
+      // googleAuthOptions: credentials,
     });
   } catch (error) {
     console.error("Error parsing GOOGLE_APPLICATION_CREDENTIALS_JSON:", error);
