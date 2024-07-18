@@ -19,17 +19,21 @@ function initializeVertexAI() {
     );
   }
 
+  console.log("Credentials JSON type:", typeof credentialsJson);
+  console.log("Credentials JSON first 100 characters:", credentialsJson.substring(0, 100));
+
   try {
     const credentials = JSON.parse(credentialsJson);
+    console.log("Parsed credentials project_id:", credentials.project_id);
     return new VertexAI({
       project: process.env.PROJECT_ID,
       location: "us-central1",
       googleAuthOptions: credentials,
       // apiEndpoint: credentials
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error parsing GOOGLE_APPLICATION_CREDENTIALS_JSON:", error);
-    throw new Error("Invalid GOOGLE_APPLICATION_CREDENTIALS_JSON");
+    throw new Error("Invalid GOOGLE_APPLICATION_CREDENTIALS_JSON", error.message + error);
   }
 }
 
