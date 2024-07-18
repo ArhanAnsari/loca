@@ -134,13 +134,13 @@ export async function POST(req: NextRequest) {
     }, { status: 200 });
   } catch (error: any) {
     console.error('Server Error:', error.message);
-    let errorMessage = 'Something went wrong on the server';
+    let errorMessage = `Something went wrong on the server ${error.message}`;
     let statusCode = 500;
     if (error.message.includes('Google Places API Error')) {
-      errorMessage = 'Error fetching local services. Please try again later.';
+      errorMessage = `Error fetching local services. Please try again later. ${error.message}`;
       statusCode = 503; // Service Unavailable
     } else if (error.message.includes('Vertex AI') || error.message.includes('GOOGLE_APPLICATION_CREDENTIALS_JSON')) {
-      errorMessage = 'Error communicating with AI service. Please check the configuration and try again later.';
+      errorMessage = `Error communicating with AI service. Please check the configuration and try again later.${error.message}`;
       statusCode = 503;
     }
     return NextResponse.json({ error: errorMessage }, { status: statusCode });
