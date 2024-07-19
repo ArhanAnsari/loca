@@ -1,103 +1,62 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
-import {
-  VertexAI,
-  HarmCategory,
-  HarmBlockThreshold,
-} from "@google-cloud/vertexai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// I import google cloud services credential from here 
+// Initialize the Google Generative AI client
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
-// Function to initialize Vertex AI with JSON credentials
-function initializeVertexAI() {
-  // const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON 
-
-
-  // if (!credentialsJson) {
-  //   throw new Error(
-  //     "GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable is not set"
-  //   );
-  // }
-
-  // console.log("Credentials JSON type:", typeof credentialsJson);
-  // console.log("Credentials JSON first 100 characters:", credentialsJson.substring(0, 100));
-  const credentials = {
-    project_id: process.env.PROJECT_ID,
-    client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
-    private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  };
-
-  try {
- 
-    console.log("Parsed credentials project_id:", credentials.project_id);
-    return new VertexAI({
-      project: process.env.PROJECT_ID,
-      location: "us-central1",
-      googleAuthOptions: JSON.parse(JSON.stringify(credentials)),
-      // apiEndpoint: credentials
-    });
-  } catch (error: any) {
-    console.error("Error parsing GOOGLE_APPLICATION_CREDENTIALS_JSON:", error);
-    throw new Error("Invalid GOOGLE_APPLICATION_CREDENTIALS_JSON", error.message + error);
-  }
-}
-
-// Function to get local services from Google Places API
-async function getLocalServices(
-  query: string,
-  latitude: string,
-  longitude: string
-) {
-  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
-
-  if (!apiKey) {
-    console.error("Google Places API key is not set");
-    throw new Error("Google Places API key is not configured");
-  }
-
-  try {
-    const response = await axios.get(
-      "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
-      {
-        params: {
-          location: `${latitude},${longitude}`,
-          radius: 5000, // Search within 5km radius
-          type: "business", // This can be adjusted based on the specific types you're interested in
-          keyword: query,
-          key: apiKey,
-        },
-        timeout: 8000, // Reduced timeout for faster failure
+// Function to get local services from Google Places API (unchanged)
+async function getLocalServices(query: string, latitude: string, longitude: string) {
+    const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  
+    if (!apiKey) {
+      console.error("Google Places API key is not set");
+      throw new Error("Google Places API key is not configured");
+    }
+  
+    try {
+      const response = await axios.get(
+        "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
+        {
+          params: {
+            location: `${latitude},${longitude}`,
+            radius: 5000, // Search within 5km radius
+            type: "business", // This can be adjusted based on the specific types you're interested in
+            keyword: query,
+            key: apiKey,
+          },
+          timeout: 8000, // Reduced timeout for faster failure
+        }
+      );
+  
+      if (response.data.status === "REQUEST_DENIED") {
+        console.error(
+          "Google Places API request denied:",
+          response.data.error_message
+        );
+        throw new Error(
+          `Google Places API request denied: ${response.data.error_message}`
+        );
       }
-    );
-
-    if (response.data.status === "REQUEST_DENIED") {
-      console.error(
-        "Google Places API request denied:",
-        response.data.error_message
-      );
-      throw new Error(
-        `Google Places API request denied: ${response.data.error_message}`
-      );
-    }
-
-    return response.data.results.slice(0, 5).map((place: any) => ({
-      name: place.name,
-      address: place.vicinity,
-      rating: place.rating,
-      user_ratings_total: place.user_ratings_total,
-      place_id: place.place_id,
-    }));
-  } catch (error) {
-    console.error("Google Places API Error:", error);
-    if (axios.isAxiosError(error) && error.response) {
-      throw new Error(
-        `Google Places API Error: ${error.response.status} - ${error.response.data.error_message}`
-      );
-    } else {
-      throw new Error("Failed to fetch local services");
+  
+      return response.data.results.slice(0, 5).map((place: any) => ({
+        name: place.name,
+        address: place.vicinity,
+        rating: place.rating,
+        user_ratings_total: place.user_ratings_total,
+        place_id: place.place_id,
+      }));
+    } catch (error) {
+      console.error("Google Places API Error:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(
+          `Google Places API Error: ${error.response.status} - ${error.response.data.error_message}`
+        );
+      } else {
+        throw new Error("Failed to fetch local services");
+      }
     }
   }
-}
 
 export async function POST(req: NextRequest) {
   const { userMessage, latitude, longitude } = await req.json();
@@ -110,34 +69,6 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const vertexAI = initializeVertexAI();
-    const model = vertexAI.getGenerativeModel({ model: "gemini-1.5-pro-001" });
-    const chat = model.startChat({
-      generationConfig: {
-        maxOutputTokens: 1024,
-        temperature: 0.7,
-        topP: 1,
-      },
-      safetySettings: [
-        {
-          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-      ],
-    });
-
     console.log("Fetching local services");
     let services;
     try {
@@ -148,8 +79,10 @@ export async function POST(req: NextRequest) {
       services = [];
     }
 
-    console.log("Sending message to Vertex AI");
-    const contextMessage = `You are to act as a loca an AI local service finder build by devben. User is looking for local services: "${userMessage}". ${
+    console.log("Sending message to Gemini");
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    const contextMessage = `You are to act as a local AI service finder built by devben. User is looking for local services: "${userMessage}". ${
       services.length > 0
         ? `Here are some available services: ${JSON.stringify(
             services
@@ -157,12 +90,10 @@ export async function POST(req: NextRequest) {
         : `Unfortunately, we couldn't find any local services matching the query. Please provide a general response about ${userMessage} and suggest how the user might find local services.`
     }`;
 
-    const result = await chat.sendMessage(contextMessage);
-    console.log("Received response from Vertex AI");
-
-    const vertexResponseText =
-      result.response?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "No response from Vertex AI";
+    const result = await model.generateContent(contextMessage);
+    const response = await result.response;
+    const vertexResponseText = response.text();
+    console.log("Received response from Gemini");
 
     return NextResponse.json(
       {
@@ -178,11 +109,8 @@ export async function POST(req: NextRequest) {
     if (error.message.includes("Google Places API Error")) {
       errorMessage = `Error fetching local services. Please try again later. ${error.message}`;
       statusCode = 503; // Service Unavailable
-    } else if (
-      error.message.includes("Vertex AI") ||
-      error.message.includes("GOOGLE_APPLICATION_CREDENTIALS_JSON")
-    ) {
-      errorMessage = `Error communicating with AI service. Please check the configuration and try again later.${error.message}`;
+    } else if (error.message.includes("Gemini API")) {
+      errorMessage = `Error communicating with AI service. Please check the configuration and try again later. ${error.message}`;
       statusCode = 503;
     }
     return NextResponse.json({ error: errorMessage }, { status: statusCode });
