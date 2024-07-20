@@ -271,7 +271,7 @@ const Main: React.FC = () => {
             </>
           ) : (
             conversation.map((message, index) => (
-              <div key={index} className="flex gap-4 items-center self-start">
+              <div key={index} className="flex flex-col lg:flex-row  gap-4 items-center self-start">
                 <Image
                   src={message.sender === "user" ? image : Logo}
                   alt={message.sender === "user" ? "user" : "Loca AI image"}
