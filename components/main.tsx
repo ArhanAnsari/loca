@@ -9,10 +9,11 @@ import Logo from "@/public/png/logo-no-background.png";
 import { CardComponent } from "./home";
 import { SendHorizontalIcon, LogOut, PlusIcon } from "lucide-react";
 import { onAuthStateChanged } from "firebase/auth";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import Link from "next/link";
 import { SkeletonCard } from "./loading";
 import FirstVisitPopup from "./firstvisitpopup";
+import ReactMarkdown from "react-markdown";
 
 interface Location {
   latitude: number | null;
@@ -51,19 +52,21 @@ const Main: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [manualLocation, setManualLocation] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
+    // Getting location automatically
     const getLocation = () => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          (position) => {
+          (position: GeolocationPosition) => {
             setLocation({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
+              latitude: position.coords.latitude || null,
+              longitude: position.coords.longitude || null,
             });
             setLocationError(null);
           },
-          (error) => {
+          (error: GeolocationPositionError) => {
             console.error("Error getting geolocation:", error.message);
             setLocationError(
               `Unable to get your location. Please ensure location services are enabled.`
@@ -72,7 +75,7 @@ const Main: React.FC = () => {
           { timeout: 10000, maximumAge: 60000, enableHighAccuracy: true }
         );
       } else {
-        setLocationError("Geolocation is not supported by this browser.");
+        setLocationError("Geolocation is not supported by this browser. Please enter your location manually");
       }
     };
 
@@ -85,12 +88,51 @@ const Main: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  const handleSendMessage = async () => {
-    if (!userMessage.trim()) return;
-    if (!location.latitude || !location.longitude) {
-      alert(
-        "Location is not available. Please enable location services and try again."
+  // handler for manual location if error occur on automatic location
+  const handleManualLocationSubmit = async () => {
+    if(!manualLocation.trim()){
+      setLocationError("please enter a location.");
+      return false
+    }
+
+    setIsProcessing(true)
+    try {
+      const res: AxiosResponse<any, any> = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+          manualLocation
+        )}&key=${process.env.GOOGLE_PLACES_API_KEY}`
       );
+
+      if (res.data.results && res.data.results.length > 0) {
+        const { lat, lag } = res.data.result[0].geometry.location;
+        setLocation({ latitude: lat, longitude: lag });
+        setLocationError(null);
+        return true;
+      } else {
+        setLocationError("Unable to find the location. Please try a more specific address.");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error geocoding manual location:", error);
+      setLocationError("Error processing location. Please try again or use a different address");
+      return false;
+    } finally{
+      setIsProcessing(false)
+    }
+  };
+
+  // if(locationError){
+  //   alert(locationError)
+  // }
+  // handler for sending message to the sever
+  const handleSendMessage = async () => {
+    if (!userMessage.trim() || isProcessing) return;
+    setIsProcessing(true)
+    if (!location.latitude || !location.longitude) {
+      const locationSubmitted = await handleManualLocationSubmit();
+      if(!locationSubmitted){
+        return
+      }
       return;
     }
 
@@ -101,10 +143,11 @@ const Main: React.FC = () => {
     setConversation(newConversation);
     setUserMessage("");
     setIsLoading(true);
+    setIsProcessing(true);
 
+    // If any error occur on server retry at least 3X
     const retryCount = 3;
-    const baseTimeout = 40000; // 20 seconds
-
+    const baseTimeout = 20000;
     for (let attempt = 0; attempt < retryCount; attempt++) {
       try {
         const response = await axios.post(
@@ -122,14 +165,18 @@ const Main: React.FC = () => {
 
         const data = response.data;
         if (data.error) {
-          console.log(data.error)
+          console.log(data.error);
           throw new Error(data.error);
         }
+
+        let formattedResponse = (
+          <ReactMarkdown>{data.vertexResponse}</ReactMarkdown>
+        );
 
         // Combine AI response and service information
         let aiResponse: React.ReactNode = (
           <div>
-            <p>{data.vertexResponse}</p>
+            {formattedResponse}
             {data.services && data.services.length > 0 && (
               <div className="mt-4 w-full">
                 <article>
@@ -161,15 +208,19 @@ const Main: React.FC = () => {
         setIsLoading(false);
         return; // Success, exit the retry loop
       } catch (error: any) {
-        console.error(`Error sending message (attempt ${attempt + 1}):`, error.message);
+        console.error(
+          `Error sending message (attempt ${attempt + 1}):`,
+          error.message
+        );
 
         if (attempt === retryCount - 1) {
           // This was the last attempt
           let errorMessage =
             "Sorry, an error occurred while processing your request.";
           if (axios.isAxiosError(error) && error.code === "ECONNABORTED") {
-            errorMessage =
-              `The request is taking longer than expected. Please try again later., ${axios.isAxiosError(error), error.message}`;
+            errorMessage = `The request is taking longer than expected. Please try again later., ${
+              (axios.isAxiosError(error), error.message)
+            }`;
           }
           setConversation([
             ...newConversation,
@@ -180,6 +231,9 @@ const Main: React.FC = () => {
           // Wait before the next retry
           await new Promise((resolve) => setTimeout(resolve, 2000));
         }
+      } finally {
+        setIsLoading(false);
+        setIsProcessing(false);
       }
     }
   };
@@ -188,7 +242,7 @@ const Main: React.FC = () => {
 
   return (
     <main className="lg:p-4 flex-1 overflow-auto relative">
-       <FirstVisitPopup />
+      <FirstVisitPopup />
       {/* navbar */}
       <nav className="flex justify-between sticky p-4">
         <span className="text-[#caccce] font-medium text-3xl">Loca</span>
@@ -245,20 +299,28 @@ const Main: React.FC = () => {
                 className="w-full max-w-4xl rounded-full h-10 bg-[#1e1f20] text-[#ccc] p-2 px-4 outline-none"
                 placeholder="Enter your full location "
               />
+              
             </div>
           )}
           <input
             type="text"
             value={userMessage}
             onChange={(e) => setUserMessage(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+            onKeyPress={(e) =>
+              e.key === "Enter" && !isProcessing && handleSendMessage()
+            }
             className="w-full max-w-4xl rounded-full h-16 bg-[#1e1f20] text-[#ccc] p-2 px-4 outline-none cursor-text text-md"
-            placeholder={`looking for local service provider?`}
+            placeholder={`Looking for local service provider?${
+              isProcessing ? "processing...." : ""
+            }`}
+            disabled={isProcessing}
           />
           {/* <PlusIcon className="absolute text-[#ccc] left-8 bottom-4 cursor-pointer"/> */}
           <SendHorizontalIcon
-            className="absolute text-[#ccc] right-9 bottom-10 cursor-pointer"
-            onClick={handleSendMessage}
+            className={`absolute text-[#ccc] right-9 bottom-10 cursor-pointer ${
+              isProcessing ? "opacity-50" : ""
+            }`}
+            onClick={() => !isProcessing && handleSendMessage}
           />
         </div>
       </header>
