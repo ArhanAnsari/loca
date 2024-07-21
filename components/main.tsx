@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ChangeEvent, useRef } from "react";
 import { auth } from "@/lib/firebase";
 import { SignOut } from "@/lib/signIn";
 import Image from "next/image";
@@ -14,32 +14,12 @@ import Link from "next/link";
 import { SkeletonCard } from "./loading";
 import FirstVisitPopup from "./firstvisitpopup";
 import ReactMarkdown from "react-markdown";
+import { cn } from "@/lib/utils";
 
-interface Location {
+type Location = {
   latitude: number | null;
   longitude: number | null;
 }
-
-interface ServiceItem {
-  name: string;
-  address: string;
-  rating: number;
-  user_ratings_total: number;
-  place_id: string;
-}
-
-interface LocalServiceCardProps {
-  name: string;
-  address: string;
-  rating: number;
-  user_ratings_total: number;
-  place_id: string;
-}
-
-type ConversationItem = {
-  sender: string;
-  text: React.ReactNode;
-};
 
 const Main: React.FC = () => {
   const [user, setUser] = useState(auth.currentUser);
@@ -53,6 +33,14 @@ const Main: React.FC = () => {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [manualLocation, setManualLocation] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const conversationEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    conversationEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  useEffect(() => {
+    scrollToBottom();
+  }, [conversation]);
 
   useEffect(() => {
     // Getting location automatically
@@ -75,7 +63,9 @@ const Main: React.FC = () => {
           { timeout: 10000, maximumAge: 60000, enableHighAccuracy: true }
         );
       } else {
-        setLocationError("Geolocation is not supported by this browser. Please enter your location manually");
+        setLocationError(
+          "Geolocation is not supported by this browser. Please enter your location manually"
+        );
       }
     };
 
@@ -90,12 +80,12 @@ const Main: React.FC = () => {
 
   // handler for manual location if error occur on automatic location
   const handleManualLocationSubmit = async () => {
-    if(!manualLocation.trim()){
+    if (!manualLocation.trim()) {
       setLocationError("please enter a location.");
-      return false
+      return false;
     }
 
-    setIsProcessing(true)
+    setIsProcessing(true);
     try {
       const res: AxiosResponse<any, any> = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
@@ -109,15 +99,19 @@ const Main: React.FC = () => {
         setLocationError(null);
         return true;
       } else {
-        setLocationError("Unable to find the location. Please try a more specific address.");
+        setLocationError(
+          "Unable to find the location. Please try a more specific address."
+        );
         return false;
       }
     } catch (error) {
       console.error("Error geocoding manual location:", error);
-      setLocationError("Error processing location. Please try again or use a different address");
+      setLocationError(
+        "Error processing location. Please try again or use a different address"
+      );
       return false;
-    } finally{
-      setIsProcessing(false)
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -127,16 +121,16 @@ const Main: React.FC = () => {
   // handler for sending message to the sever
   const handleSendMessage = async () => {
     if (!userMessage.trim() || isProcessing) return;
-    setIsProcessing(true)
+    setIsProcessing(true);
     if (!location.latitude || !location.longitude) {
       const locationSubmitted = await handleManualLocationSubmit();
-      if(!locationSubmitted){
-        return
+      if (!locationSubmitted) {
+        return;
       }
       return;
     }
 
-    const newConversation = [
+    const newConversation: ConversationItem[] = [
       ...conversation,
       { sender: "user", text: userMessage },
     ];
@@ -163,7 +157,7 @@ const Main: React.FC = () => {
           }
         );
 
-        const data = response.data;
+       const data = response.data;
         if (data.error) {
           console.log(data.error);
           throw new Error(data.error);
@@ -180,20 +174,23 @@ const Main: React.FC = () => {
             {data.services && data.services.length > 0 && (
               <div className="mt-4 w-full">
                 <article>
-                  Here are some local service providers that might help:
+                  Check this out or <Link href="/">View More</Link>
                 </article>
 
-                {data.services.map((service: ServiceItem, index: number) => (
-                  <div key={index} className="w-full">
-                    <LocalServiceCard
-                      name={service.name}
-                      address={service.address}
-                      rating={service.rating}
-                      user_ratings_total={service.user_ratings_total}
-                      place_id={service.place_id}
-                    />
+                {data.services && (
+                  <div className="w-full grid grid-rows-2">
+                    {data.services.slice(0, 2).map((service:ServiceItem ) => (
+                      <LocalServiceCard
+                        key={service.place_id}
+                        name={service.name}
+                        address={service.address}
+                        rating={service.rating}
+                        user_ratings_total={service.user_ratings_total}
+                        place_id={service.place_id}
+                      />
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
             )}
           </div>
@@ -239,24 +236,24 @@ const Main: React.FC = () => {
   };
 
   const image = user?.photoURL || local;
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height =
+        textareaRef.current.scrollHeight + "px";
+    }
+  }, [userMessage]);
+
+  const handleInput = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setUserMessage(e.target.value);
+  };
   return (
-    <main className="lg:p-4 flex-1 overflow-auto relative">
-      <FirstVisitPopup />
-      {/* navbar */}
-      <nav className="flex justify-between sticky p-4">
-        <span className="text-[#caccce] font-medium text-3xl">Loca</span>
-        <Image
-          src={image}
-          alt="user"
-          className="rounded-full"
-          width={50}
-          height={50}
-        />
-      </nav>
+    <main className="flex flex-col overflow-auto">
       {/* center  */}
-      <header className="max-w-[900px] m-auto h-[800px]">
-        <div className="text-white flex flex-col gap-12 h-screen max-h-[800px]  overflow-auto px-6 scroll-smooth section">
+      <header className="w-full max-w-4xl h-full max-h-[51rem] pb-20">
+        <div className="text-white flex-1 flex-col gap-12  px-6 ">
           {conversation.length === 0 ? (
             <>
               <div className="text-[#c4c7c556] lg:text-6xl text-4xl font-semibold flex flex-col self-auto">
@@ -271,59 +268,69 @@ const Main: React.FC = () => {
             </>
           ) : (
             conversation.map((message, index) => (
-              <div key={index} className="flex flex-col lg:flex-row  gap-4 items-center self-start">
+              <div
+                key={index}
+                className="flex flex-col lg:flex-row lg:items-center gap-4  mb-8"
+              >
                 <Image
                   src={message.sender === "user" ? image : Logo}
                   alt={message.sender === "user" ? "user" : "Loca AI image"}
                   width={50}
                   height={50}
-                  className="rounded-full self-start"
+                  className={cn(
+                    message.sender === "user" ? "" : "",
+                    "self-start rounded-full"
+                  )}
                 />
-                <p className="text-white" onCopy={(e) => !!e}>
+                <p className="text-white " onCopy={(e) => !!e}>
                   {message.text}
                 </p>
+                <div ref={conversationEndRef} />
               </div>
             ))
           )}
+
           {isLoading && <SkeletonCard />}
         </div>
         {/* footer */}
-        <div className="w-full lg:max-w-4xl xs:max-w-[25rem] sm:max-w-[35rem] p-5 fixed bottom-0 bg-black">
-          {locationError && (
-            <div className="mb-2">
-              <p className="text-red-500 mb-1">{locationError}</p>
-              <input
-                type="text"
-                value={manualLocation}
-                onChange={(e) => setManualLocation(e.target.value)}
-                className="w-full max-w-4xl rounded-full h-10 bg-[#1e1f20] text-[#ccc] p-2 px-4 outline-none"
-                placeholder="Enter your full location "
-              />
-              
-            </div>
-          )}
-          <input
-            type="text"
+      </header>
+      <div className=" fixed  bg-black/80  bottom-0 w-full self-center max-w-[63rem] p-4">
+        {locationError && (
+          <div className="mb-2">
+            <p className="text-red-500 mb-1">{locationError}</p>
+            <input
+              type="text"
+              value={manualLocation}
+              onChange={(e) => setManualLocation(e.target.value)}
+              className="w-full max-w-4xl rounded-full h-10 bg-[#1e1f20] text-[#ccc] p-2 px-4 outline-none"
+              placeholder="Enter your full location "
+            />
+          </div>
+        )}
+        <div className="relative flex items-center gap-2 w-full rounded-md bg-[#1e1f20] p-3">
+          <textarea
+            ref={textareaRef}
             value={userMessage}
-            onChange={(e) => setUserMessage(e.target.value)}
+            onChange={handleInput}
             onKeyPress={(e) =>
               e.key === "Enter" && !isProcessing && handleSendMessage()
             }
-            className="w-full max-w-4xl rounded-full h-16 bg-[#1e1f20] text-[#ccc] p-2 px-4 outline-none cursor-text text-md"
-            placeholder={`Looking for local service provider?${
+            className="flex-1 rounded-full bg-[#1e1f20] text-[#ccc] p-2 outline-none cursor-text text-md resize-none overflow-auto max-h-[6rem]"
+            placeholder={`Looking for local service provider? ${
               isProcessing ? "processing...." : ""
             }`}
             disabled={isProcessing}
+            rows={1}
+            style={{ maxHeight: "6rem" }} // Adjust this value as needed
           />
-          {/* <PlusIcon className="absolute text-[#ccc] left-8 bottom-4 cursor-pointer"/> */}
           <SendHorizontalIcon
-            className={`absolute text-[#ccc] right-9 bottom-10 cursor-pointer ${
+            className={`text-[#ccc] cursor-pointer ${
               isProcessing ? "opacity-50" : ""
             }`}
-            onClick={() => !isProcessing && handleSendMessage}
+            onClick={() => !isProcessing && handleSendMessage()}
           />
         </div>
-      </header>
+      </div>
       <div
         className="flex gap-2 cursor-pointer absolute top-6 right-28 text-[#ccc] lg:hidden"
         onClick={SignOut}
