@@ -6,7 +6,8 @@
         "Jsons",
         "Loca",
         "Superjson",
-        "vertexai"
+        "vertexai",
+        "viewmore"
     ],
     "IDX.aI.enableInlineCompletion": true,
     "IDX.aI.enableCodebaseIndexing": true

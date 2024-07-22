@@ -3,20 +3,17 @@ import { auth } from "@/lib/firebase";
 import { SignOut } from "@/lib/signIn";
 import Image from "next/image";
 import local from "@/public/png/logo-black.png";
-import Typewriter from "typewriter-effect";
 import { useEffect, useState } from "react";
 import Logo from "@/public/png/logo-no-background.png";
-import { CardComponent } from "./home";
 import { SendHorizontalIcon, LogOut, PlusIcon } from "lucide-react";
 import { onAuthStateChanged } from "firebase/auth";
 import axios, { AxiosResponse } from "axios";
-import Link from "next/link";
 import { SkeletonCard } from "./loading";
-import FirstVisitPopup from "./firstvisitpopup";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import ViewMore from "./viewmore";
-import { Button } from "./ui/button";
+import { LocalServiceCard } from "./LocalServiceCard";
+import { CardCarousel } from "./CardCarousel";
 
 type Location = {
   latitude: number | null;
@@ -345,175 +342,3 @@ const Main: React.FC = () => {
 };
 
 export default Main;
-
-const CardCarousel = () => {
-  const [showResponse, setShowResponse] = useState(false);
-  const [showCard, setShowCard] = useState(false);
-  const [text, setText] = useState(true);
-  const [user, setUser] = useState(auth.currentUser);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const image = user?.photoURL || local;
-  const robotText = `Hi ${user?.displayName}, Yes! I found a great one nearby. Check it out and book now.`;
-  return (
-    <div className="flex gap-12 items-center">
-      <div className="relative  bg-[#34343677] w-full max-w-[30rem] h-[21rem]">
-        <div className=" p-4 rounded-lg">
-          <div className="flex gap-2">
-            <Image
-              src={Logo}
-              alt="Loca logo"
-              width={50}
-              height={50}
-              className="flex self-start"
-            />
-
-            <div className="space-y-4">
-              {!showResponse && text && (
-                <div className="mt-32 ml-20">
-                  <h1 className="animate-pulse bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-red-600 text-6xl">
-                    Loca AI
-                  </h1>
-                </div>
-              )}
-              {showResponse && (
-                <div className="text-[#caccce]">
-                  <Typewriter
-                    onInit={(t) => {
-                      t.typeString(robotText)
-                        .callFunction(() => {
-                          setShowCard(true);
-                        })
-                        .start();
-                    }}
-                  />
-                </div>
-              )}
-              {showCard && <CardComponent />}
-            </div>
-          </div>
-        </div>
-        <div className="flex gap-2 p-6 items-center absolute -bottom-14 right-0 bg-[#131314] rounded-lg">
-          <Image
-            src={image}
-            alt="Loca logo"
-            width={50}
-            height={50}
-            className="rounded-full"
-          />
-          <div className="text-[#caccce] font-semibold">
-            <Typewriter
-              onInit={(t) => {
-                t.typeString(
-                  `<p className="text-[#caccce] font-semibold"> Hey <b>Loca</b>, any plumber near <br /> me in Texas</p>`
-                )
-                  // .pauseFor(2500)
-                  .callFunction(() => {
-                    setShowResponse(true);
-                    setText(false);
-                  })
-                  .start();
-              }}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="relative lg:hidden xl:block hidden  bg-[#34343677] w-full max-w-[30rem] h-80">
-        <div className=" p-4 rounded-lg">
-          <div className="flex gap-2">
-            <Image
-              src={Logo}
-              alt="Loca logo"
-              width={50}
-              height={50}
-              className="flex self-start"
-            />
-
-            <div className="space-y-4">
-              {!showResponse && text && (
-                <div className="mt-32 ml-20">
-                  <h1 className="animate-pulse bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-red-600 text-6xl">
-                    Loca AI
-                  </h1>
-                </div>
-              )}
-              {showResponse && (
-                <div className="text-[#caccce]">
-                  <Typewriter
-                    onInit={(t) => {
-                      t.typeString(robotText)
-                        .callFunction(() => {
-                          setShowCard(true);
-                        })
-                        .start();
-                    }}
-                  />
-                </div>
-              )}
-              {showCard && <CardComponent />}
-            </div>
-          </div>
-        </div>
-        <div className="flex gap-2 p-6 items-center absolute -bottom-14 right-0 bg-[#131314] rounded-lg">
-          <Image
-            src={image}
-            alt="Loca logo"
-            width={50}
-            height={50}
-            className="rounded-full"
-          />
-          <div className="text-[#caccce] font-semibold">
-            <Typewriter
-              onInit={(t) => {
-                t.typeString(
-                  `<p className="text-[#caccce] font-semibold"> Hey <b>Loca</b>, any plumber near <br /> me in Texas</p>`
-                )
-                  // .pauseFor(2500)
-                  .callFunction(() => {
-                    setShowResponse(true);
-                    setText(false);
-                  })
-                  .start();
-              }}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export const LocalServiceCard: React.FC<LocalServiceCardProps> = ({
-  name,
-  address,
-  rating,
-  user_ratings_total,
-  place_id,
-}) => {
-  return (
-    <div className="  border-[2px] border-[#caccce] border-dotted p-4 space-y-2 mb-4 w-full max-w-[410px]">
-      <h3 className="text-white font-semibold">{name}</h3>
-      <p className="text-white">{address}</p>
-      <p className="text-white">
-        Rating: {rating} ({user_ratings_total} reviews)
-      </p>
-      <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 text-black">
-        <Link
-          href={`https://www.google.com/maps/place/?q=place_id:${place_id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-black"
-        >
-          Book Now
-        </Link>
-      </Button>
-    </div>
-  );
-};

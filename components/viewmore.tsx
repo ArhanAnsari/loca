@@ -7,7 +7,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import axios from "axios";
-import { LocalServiceCard } from "./main";
+import { LocalServiceCard } from "./LocalServiceCard";
 
 const ViewMore: React.FC<ViewMoreProps> = ({ data }) => {
   return (
