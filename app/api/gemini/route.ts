@@ -39,7 +39,7 @@ async function getLocalServices(query: string, latitude: string, longitude: stri
         );
       }
   
-      return response.data.results.slice(0, 8).map((place: any) => ({
+      return response.data.results.slice(0, 6).map((place: any) => ({
         name: place.name,
         address: place.vicinity,
         rating: place.rating,
