@@ -15,11 +15,13 @@ import { SkeletonCard } from "./loading";
 import FirstVisitPopup from "./firstvisitpopup";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
+import ViewMore from "./viewmore";
+import { Button } from "./ui/button";
 
 type Location = {
   latitude: number | null;
   longitude: number | null;
-}
+};
 
 const Main: React.FC = () => {
   const [user, setUser] = useState(auth.currentUser);
@@ -157,7 +159,7 @@ const Main: React.FC = () => {
           }
         );
 
-       const data = response.data;
+        const data = response.data;
         if (data.error) {
           console.log(data.error);
           throw new Error(data.error);
@@ -173,13 +175,13 @@ const Main: React.FC = () => {
             {formattedResponse}
             {data.services && data.services.length > 0 && (
               <div className="mt-4 w-full">
-                <article>
-                  Check this out or <Link href="/">View More</Link>
+                <article className="flex gap-2">
+                  Check this out or <ViewMore data={data.services.slice(2)} />
                 </article>
 
                 {data.services && (
                   <div className="w-full grid grid-rows-2">
-                    {data.services.slice(0, 2).map((service:ServiceItem ) => (
+                    {data.services.slice(0, 2).map((service: ServiceItem) => (
                       <LocalServiceCard
                         key={service.place_id}
                         name={service.name}
@@ -488,7 +490,7 @@ const CardCarousel = () => {
   );
 };
 
-const LocalServiceCard: React.FC<LocalServiceCardProps> = ({
+export const LocalServiceCard: React.FC<LocalServiceCardProps> = ({
   name,
   address,
   rating,
@@ -502,14 +504,16 @@ const LocalServiceCard: React.FC<LocalServiceCardProps> = ({
       <p className="text-white">
         Rating: {rating} ({user_ratings_total} reviews)
       </p>
-      <Link
-        href={`https://www.google.com/maps/place/?q=place_id:${place_id}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-blue-400 hover:text-blue-300"
-      >
-        View on Google Maps
-      </Link>
+      <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 text-black">
+        <Link
+          href={`https://www.google.com/maps/place/?q=place_id:${place_id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-black"
+        >
+          Book Now
+        </Link>
+      </Button>
     </div>
   );
 };

@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Sheet,
   SheetContent,
@@ -8,20 +7,30 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import axios from "axios";
+import { LocalServiceCard } from "./main";
 
-const ViewMore = async () => {
-
+const ViewMore: React.FC<ViewMoreProps> = ({ data }) => {
   return (
     <main>
       <Sheet>
-        <SheetTrigger>Open</SheetTrigger>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>Are you absolutely sure?</SheetTitle>
+        <SheetTrigger>View More</SheetTrigger>
+        <SheetContent className="bg-[#1e1f20] text-white border-none">
+          <SheetHeader className="mt-5">
+            <SheetTitle className="text-white text-md">These are the Rest of Services find near you.</SheetTitle>
             <SheetDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove your data from our servers.
+              
             </SheetDescription>
+       
+                    {data.map((service:ServiceItem ) => (
+                      <LocalServiceCard
+                        key={service.place_id}
+                        name={service.name}
+                        address={service.address}
+                        rating={service.rating}
+                        user_ratings_total={service.user_ratings_total}
+                        place_id={service.place_id}
+                      />
+                    ))}
           </SheetHeader>
         </SheetContent>
       </Sheet>

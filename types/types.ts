@@ -21,5 +21,8 @@
     text: React.ReactNode;
   };
 
+  interface ViewMoreProps {
+    data: ServiceItem[];
+  }
 
 //   export {ConversationItem, LocalServiceCardProps, ServiceItem,Location}

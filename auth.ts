@@ -1,5 +1,4 @@
-import NextAuth from "next-auth"
- 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  providers: [],
-})
+export async function getServerSideProps(context: { req: { cookies: any; }; }) {
+  console.log('Cookies in getServerSideProps:', context.req.cookies);
+  return { props: {} };
+}

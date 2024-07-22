@@ -20,29 +20,31 @@ export default function Chat() {
   });
   return (
     <main className=" flex h-screen   w-[100%]  bg-black">
-        <FirstVisitPopup />
+      <FirstVisitPopup />
       <div className=" hidden lg:block">
         <Sidebar />
       </div>
       <div className=" bg-[#1212] h-screen flex-1">
         <div className="flex flex-col">
-        <nav className="flex justify-between  p-4">
-          <span className="text-[#caccce] font-medium text-3xl cursor-pointer" onClick={() => window.location.href = "/"}>Loca</span>
-          <Image
-            src={image}
-            alt="user"
-            className="rounded-full"
-            width={50}
-            height={50}
-          />
-        </nav>
-        <div className="self-center">
-        <Main />
+          <nav className="flex justify-between  p-4">
+            <span
+              className="text-[#caccce] font-medium text-3xl cursor-pointer"
+              onClick={() => (window.location.href = "/")}
+            >
+              Loca
+            </span>
+            <Image
+              src={image}
+              alt="user"
+              className="rounded-full"
+              width={50}
+              height={50}
+            />
+          </nav>
+          <div className="self-center">
+            <Main />
+          </div>
         </div>
-       
-        </div>
-    
-       
       </div>
     </main>
   );

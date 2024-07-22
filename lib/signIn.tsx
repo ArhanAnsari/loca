@@ -3,7 +3,7 @@ import { auth } from './firebase';
 import toast from 'react-hot-toast';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
-
+import { setCookie } from 'cookies-next';
 const signIn = () => {
   const provider = new GoogleAuthProvider();
   // const router = useRouter();
@@ -13,14 +13,17 @@ const signIn = () => {
       const credential = GoogleAuthProvider.credentialFromResult(res);
       const token = credential?.accessToken;
       const user = res.user;
-      console.log(user);
-      console.log(token);
+ 
 
-      Cookies.set('token', String(token), {
-        expires: 7,
-        secure: true,
-        sameSite: 'strict',
-      });
+      setCookie('token', token, {
+        maxAge: 60 * 3 * 24,
+        expires: new Date(60 * 3 * 24)
+      })
+      // Cookies.set('token', String(token), {
+      //   expires: 7,
+      //   secure: true,
+      //   sameSite: 'strict',
+      // });
       window.localStorage.setItem('user', JSON.stringify(user));
       toast.success('SignIn successful');
       // router.push('/chat');
