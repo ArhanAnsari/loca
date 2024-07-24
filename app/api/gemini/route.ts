@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   const stream = new TransformStream();
   const writer = stream.writable.getWriter();
 
-  const writeChunk = async (chunk: string) => {
+  const writeChunk = async (chunk: { type: string; data: any }) => {
     await writer.write(encoder.encode(JSON.stringify(chunk) + '\n'));
   };
 
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 }
 
 function extractServiceKeywords(input: string): string | null {
-  const keywords = ["plumber", "electrician", "mechanic", "restaurant", "dentist"];
+  const keywords = ["plumber", "nearby", 'downtown', 'near me', "any", "electrician", "mechanic", "restaurant", "dentist"];
   const lowercaseInput = input.toLowerCase();
   
   for (const keyword of keywords) {

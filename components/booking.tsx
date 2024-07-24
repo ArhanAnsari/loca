@@ -65,7 +65,8 @@ export function Booking({
                     id="link"
                     defaultValue="1234567890"
                     readOnly
-                    className="outline-none bg-white/15 border-none rounded-tl-2xl "
+                    disabled
+                    className="hover:border-none bg-white/15 border-none outline-none rounded-tl-2xl "
                   />
                 </div>
                 <div>
@@ -76,11 +77,13 @@ export function Booking({
                     id="link"
                     defaultValue="1234567890"
                     readOnly
+                    disabled
                     className="outline-none bg-white/15 border-none  rounded-tr-2xl"
                   />
                 </div>
               </div>
             </div>
+            <span>{mapLink}</span>
             <div className="">
               <iframe
                 title={locationName}
