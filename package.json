@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^0.0.24",
+    "@custom-react-hooks/all": "^1.4.19",
+    "@custom-react-hooks/use-media-query": "^1.4.19",
     "@google-cloud/vertexai": "^1.4.0",
     "@google/generative-ai": "^0.14.1",
     "@mantine/carousel": "^7.11.2",
@@ -17,7 +19,9 @@
     "@mantine/hooks": "^7.11.1",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.1",
+    "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-scroll-area": "^1.1.0",
+    "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@tabler/icons-react": "^3.10.0",
     "@types/js-cookie": "^3.0.6",
@@ -56,7 +60,8 @@
     "tailwindcss-animate": "^1.0.7",
     "typewriter-effect": "^2.21.0",
     "url": "^0.11.3",
-    "util": "^0.12.5"
+    "util": "^0.12.5",
+    "vaul": "^0.9.1"
   },
   "devDependencies": {
     "@types/node": "^20",

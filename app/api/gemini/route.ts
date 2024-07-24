@@ -1,121 +1,78 @@
-import { NextRequest, NextResponse } from "next/server";
-import axios from "axios";
+import { NextRequest } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getLocalServices } from "@/lib/getLocationServices";
 
-// Initialize the Google Generative AI client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const locaResponseAuto = "Role Definition:\n\nLoca is a virtual assistant that helps users find local services quickly and efficiently.\nIt interacts with users through natural language queries and provides relevant service suggestions.\nLoca should be polite, helpful, and provide actionable responses.\nExpected Behavior:\n\nUnderstand user queries about finding local services.\nExtract relevant details such as service type and location from the queries.\nRespond with appropriate local service recommendations fetched using the Google Places API.\nHandle both specific and general queries gracefully.\nTraining Prompts\nUser Query Examples and Expected Responses:\n\nQuery:\n\nUser: \"Hey Loca, any plumbers near me in Texas?\"\nLoca Response: \"Sure! I found a great plumber nearby in Texas. Here are the details: [Service Listing with booking link]\"\nQuery:\n\nUser: \"Can you find an electrician in New York?\"\nLoca Response: \"Absolutely! Here are some electricians near you in New York: [Service Listing with booking link]\"\nQuery:\n\nUser: \"I need a good mechanic in Los Angeles.\"\nLoca Response: \"I found some highly-rated mechanics in Los Angeles. Check them out: [Service Listing with booking link]\"\nQuery:\n\nUser: \"Are there any good restaurants around here?\"\nLoca Response: \"Yes! There are several great restaurants nearby. Here are some options: [Service Listing with booking link]\"\nQuery:\n\nUser: \"Find a nearby dentist.\"\nLoca Response: \"Sure! Here are some dentists near your location: [Service Listing with booking link]\"\nEntities to Extract\nService Type: Plumber, electrician, mechanic, restaurant, dentist, etc.\nLocation: Texas, New York, Los Angeles, etc.\nAdditional Details: Any additional context provided by the user.\nSample API Response Integration\njavascript\nCopy code\nconst exampleServiceListing = {\n  name: \"John's Plumbing\",\n  address: \"123 Main St, Dallas, TX\",\n  rating: 4.8,\n  link: \"http://booking-link.com\"\n};\n\nconst locaResponse = `I found a great plumber nearby in Texas. Here are the details: \ndevloper Note: I already display the loca service along with your response so you don't need to relist\nResponse Format\nService Details: Name, address, rating, and a booking link.\nUser-friendly text: Use conversational language to present the information.\nCTA (Call to Action): Include a \"Book Now\" or equivalent action link.\nError Handling\nQuery Not Understood:\n\nResponse: \"I'm sorry, I didn't understand your request. Can you please specify the type of service and location?\"\nNo Services Found:\n\nResponse: \"I couldn't find any [service type] near [location]. Can you try a different location or service?\"\n"
-// Function to get local services from Google Places API (unchanged)
-async function getLocalServices(query: string, latitude: string, longitude: string) {
-    const apiKey = process.env.GOOGLE_PLACES_API_KEY;
-  
-    if (!apiKey) {
-      console.error("Google Places API key is not set");
-      throw new Error("Google Places API key is not configured");
-    }
-  
-    try {
-      const response = await axios.get(
-        "https://maps.googleapis.com/maps/api/place/nearbysearch/json",
-        {
-          params: {
-            location: `${latitude},${longitude}`,
-            radius: 5000, // Search within 5km radius
-            type: "business", // This can be adjusted based on the specific types you're interested in
-            keyword: query,
-            key: apiKey,
-          },
-          timeout: 8000, // Reduced timeout for faster failure
-        }
-      );
-  
-      if (response.data.status === "REQUEST_DENIED") {
-        console.error(
-          "Google Places API request denied:",
-          response.data.error_message
-        );
-        throw new Error(
-          `Google Places API request denied: ${response.data.error_message}`
-        );
-      }
-  
-      return response.data.results.slice(0, 10).map((place: any) => ({
-        name: place.name,
-        address: place.vicinity,
-        rating: place.rating,
-        user_ratings_total: place.user_ratings_total,
-        place_id: place.place_id,
-      }));
-    } catch (error) {
-      console.error("Google Places API Error:", error);
-      if (axios.isAxiosError(error) && error.response) {
-        throw new Error(
-          `Google Places API Error: ${error.response.status} - ${error.response.data.error_message}`
-        );
-      } else {
-        throw new Error("Failed to fetch local services");
-      }
-    }
-  }
 
 export async function POST(req: NextRequest) {
   const { userMessage, latitude, longitude } = await req.json();
 
   if (!userMessage || !latitude || !longitude) {
-    return NextResponse.json(
-      { error: "Missing required fields: userMessage, latitude, or longitude" },
+    return new Response(
+      JSON.stringify({ error: "Missing required fields: userMessage, latitude, or longitude" }),
       { status: 400 }
     );
   }
 
-  try {
-    console.log("Fetching local services");
-    let services;
+  const encoder = new TextEncoder();
+  const stream = new TransformStream();
+  const writer = stream.writable.getWriter();
+
+  const writeChunk = async (chunk: string) => {
+    await writer.write(encoder.encode(JSON.stringify(chunk) + '\n'));
+  };
+
+  (async () => {
     try {
-      services = await getLocalServices(userMessage, latitude, longitude);
-      console.log("Received local services");
+      const serviceKeywords = extractServiceKeywords(userMessage);
+      let services = [];
+      if (serviceKeywords) {
+        services = await getLocalServices(serviceKeywords, latitude, longitude);
+        await writeChunk({ type: 'services', data: services });
+      }
+
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+
+      const prompt = `You are Loca, a local AI service finder. ${
+        services.length > 0
+          ? `Here are some available services: ${JSON.stringify(services)}. Provide a helpful response based on this information, highlighting the best options.`
+          : `Provide a general response about "${userMessage}". If the user is asking about local services, suggest how they might find them.`
+      }`;
+
+      const result = await model.generateContentStream(prompt);
+
+      for await (const chunk of result.stream) {
+        const chunkText = chunk.text();
+        await writeChunk({ type: 'text', data: chunkText });
+      }
     } catch (error) {
-      console.error("Error fetching local services:", error);
-      services = [];
+      console.error("Server Error:", error);
+      await writeChunk({ type: 'error', data: "An error occurred while processing your request." });
+    } finally {
+      writer.close();
     }
+  })();
 
-    console.log("Sending message to Gemini");
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-pro",
-      systemInstruction: "Role Definition:\n\nLoca is a virtual assistant that helps users find local services quickly and efficiently.\nIt interacts with users through natural language queries and provides relevant service suggestions.\nLoca should be polite, helpful, and provide actionable responses.\nExpected Behavior:\n\nUnderstand user queries about finding local services.\nExtract relevant details such as service type and location from the queries.\nRespond with appropriate local service recommendations fetched using the Google Places API.\nHandle both specific and general queries gracefully.\nTraining Prompts\nUser Query Examples and Expected Responses:\n\nQuery:\n\nUser: \"Hey Loca, any plumbers near me in Texas?\"\nLoca Response: \"Sure! I found a great plumber nearby in Texas. Here are the details: [Service Listing with booking link]\"\nQuery:\n\nUser: \"Can you find an electrician in New York?\"\nLoca Response: \"Absolutely! Here are some electricians near you in New York: [Service Listing with booking link]\"\nQuery:\n\nUser: \"I need a good mechanic in Los Angeles.\"\nLoca Response: \"I found some highly-rated mechanics in Los Angeles. Check them out: [Service Listing with booking link]\"\nQuery:\n\nUser: \"Are there any good restaurants around here?\"\nLoca Response: \"Yes! There are several great restaurants nearby. Here are some options: [Service Listing with booking link]\"\nQuery:\n\nUser: \"Find a nearby dentist.\"\nLoca Response: \"Sure! Here are some dentists near your location: [Service Listing with booking link]\"\nEntities to Extract\nService Type: Plumber, electrician, mechanic, restaurant, dentist, etc.\nLocation: Texas, New York, Los Angeles, etc.\nAdditional Details: Any additional context provided by the user.\nSample API Response Integration\njavascript\nCopy code\nconst exampleServiceListing = {\n  name: \"John's Plumbing\",\n  address: \"123 Main St, Dallas, TX\",\n  rating: 4.8,\n  link: \"http://booking-link.com\"\n};\n\nconst locaResponse = `I found a great plumber nearby in Texas. Here are the details: \ndevloper Note: I already display the loca service along with your response so you don't need to relist\nResponse Format\nService Details: Name, address, rating, and a booking link.\nUser-friendly text: Use conversational language to present the information.\nCTA (Call to Action): Include a \"Book Now\" or equivalent action link.\nError Handling\nQuery Not Understood:\n\nResponse: \"I'm sorry, I didn't understand your request. Can you please specify the type of service and location?\"\nNo Services Found:\n\nResponse: \"I couldn't find any [service type] near [location]. Can you try a different location or service?\"\n",
-    });
+  return new Response(stream.readable, {
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
+  });
+}
 
-    const contextMessage = `You are to act as a local AI service finder built by devben. User is looking for local services: "${userMessage}". ${
-      services.length > 0
-        ? `Here are some available services: ${JSON.stringify(
-            services
-          )}. Please provide a helpful response based on this information, highlighting and bold the best options based on ratings and number of reviews. If "${userMessage}" doesn't sound like they are looking for local service respond casually for example text like "hello what can you do" you knew you had to reply casually`
-        : `Unfortunately, we couldn't find any local services matching the query. Please provide a general response about ${userMessage} and suggest how the user might find local services.`
-    }`;
-
-    const result = await model.generateContent(contextMessage);
-    const response = await result.response;
-    const vertexResponseText = response.text();
-    console.log("Received response from Gemini");
-
-    return NextResponse.json(
-      {
-        vertexResponse: vertexResponseText,
-        services,
-      },
-      { status: 200 }
-    );
-  } catch (error: any) {
-    console.error("Server Error:", JSON.stringify(error, null, 2), error);
-    let errorMessage = `Something went wrong on the server ${error.message}`;
-    let statusCode = 500;
-    if (error.message.includes("Google Places API Error")) {
-      errorMessage = `Error fetching local services. Please try again later. ${error.message}`;
-      statusCode = 503; // Service Unavailable
-    } else if (error.message.includes("Gemini API")) {
-      errorMessage = `Error communicating with AI service. Please check the configuration and try again later. ${error.message}`;
-      statusCode = 503;
+function extractServiceKeywords(input: string): string | null {
+  const keywords = ["plumber", "electrician", "mechanic", "restaurant", "dentist"];
+  const lowercaseInput = input.toLowerCase();
+  
+  for (const keyword of keywords) {
+    if (lowercaseInput.includes(keyword)) {
+      const words = lowercaseInput.split(/\s+/);
+      const keywordIndex = words.indexOf(keyword);
+      const nearIndex = words.indexOf("near");
+      if (nearIndex !== -1 && nearIndex > keywordIndex) {
+        return words.slice(keywordIndex, nearIndex + 2).join(" ");
+      }
+      return `${keyword} near me`;
     }
-    return NextResponse.json({ error: errorMessage }, { status: statusCode });
   }
+  
+  return null;
 }

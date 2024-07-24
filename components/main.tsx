@@ -17,6 +17,9 @@ import { CardCarousel } from "./CardCarousel";
 import { User } from "firebase/auth";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DefaultChatPage } from "./Deafultchatpage";
+import { ChatPage } from "./chatpage";
+import { ChatInbox } from "./chatInbox";
 type Location = {
   latitude: number | null;
   longitude: number | null;
@@ -34,6 +37,7 @@ const Main: React.FC = () => {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [manualLocation, setManualLocation] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [streamedResponse, setStreamedResponse] = useState("");
   const conversationEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -122,15 +126,19 @@ const Main: React.FC = () => {
   // handler for sending message to the sever
   const handleSendMessage = async () => {
     if (!userMessage.trim() || isProcessing) return;
+    if (userMessage.length > 500) {
+      setLocationError("Input is too long. Please keep your message under 500 characters.");
+      return;
+    }
     setIsProcessing(true);
     if (!location.latitude || !location.longitude) {
       const locationSubmitted = await handleManualLocationSubmit();
       if (!locationSubmitted) {
+        setIsProcessing(false);
         return;
       }
-      return;
     }
-
+  
     const newConversation: ConversationItem[] = [
       ...conversation,
       { sender: "user", text: userMessage },
@@ -138,101 +146,102 @@ const Main: React.FC = () => {
     setConversation(newConversation);
     setUserMessage("");
     setIsLoading(true);
-    setIsProcessing(true);
-
-    // If any error occur on server retry at least 3X
-    const retryCount = 3;
-    const baseTimeout = 20000;
-    for (let attempt = 0; attempt < retryCount; attempt++) {
-      try {
-        const response = await axios.post(
-          "/api/gemini",
-          {
-            userMessage,
-            latitude: location.latitude,
-            longitude: location.longitude,
-          },
-          {
-            headers: { "Content-Type": "application/json" },
-            timeout: baseTimeout * (attempt + 1), // Increase timeout with each retry
-          }
-        );
-
-        const data = response.data;
-        if (data.error) {
-          console.log(data.error);
-          throw new Error(data.error);
-        }
-
-        let formattedResponse = (
-          <ReactMarkdown>{data.vertexResponse}</ReactMarkdown>
-        );
-
-        // Combine AI response and service information
-        let aiResponse: React.ReactNode = (
-          <div>
-            {formattedResponse}
-            {data.services && data.services.length > 0 && (
-              <div className="mt-4 w-full">
-                <article className="flex gap-2">
-                  Check this out or <ViewMore data={data.services.slice(2)} />
-                </article>
-
-                {data.services && (
-                  <div className="w-full grid grid-rows-2">
-                    {data.services.slice(0, 2).map((service: ServiceItem) => (
-                      <LocalServiceCard
-                        key={service.place_id}
-                        name={service.name}
-                        address={service.address}
-                        rating={service.rating}
-                        user_ratings_total={service.user_ratings_total}
-                        place_id={service.place_id}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        );
-
-        // Display AI response
-        setConversation([
-          ...newConversation,
-          { sender: "AI", text: aiResponse },
-        ]);
-
-        setIsLoading(false);
-        return; // Success, exit the retry loop
-      } catch (error: any) {
-        console.error(
-          `Error sending message (attempt ${attempt + 1}):`,
-          error.message
-        );
-
-        if (attempt === retryCount - 1) {
-          // This was the last attempt
-          let errorMessage =
-            "Sorry, an error occurred while processing your request.";
-          if (axios.isAxiosError(error) && error.code === "ECONNABORTED") {
-            errorMessage = `The request is taking longer than expected. Please try again later., ${
-              (axios.isAxiosError(error), error.message)
-            }`;
-          }
-          setConversation([
-            ...newConversation,
-            { sender: "AI", text: errorMessage },
-          ]);
-          setIsLoading(false);
-        } else {
-          // Wait before the next retry
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-        }
-      } finally {
-        setIsLoading(false);
-        setIsProcessing(false);
+    setStreamedResponse('');
+  
+    try {
+      const response = await fetch("/api/gemini", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userMessage,
+          latitude: location.latitude,
+          longitude: location.longitude,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+  
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("Failed to get response reader");
+      }
+  
+      let services: any[] = [];
+      let aiResponseText = '';
+  
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = new TextDecoder().decode(value);
+        const messages = chunk.split('\n').filter(Boolean);
+  
+        for (const message of messages) {
+          try {
+            const parsedMessage = JSON.parse(message);
+            switch (parsedMessage.type) {
+              case 'services':
+                services = parsedMessage.data;
+                break;
+              case 'text':
+                aiResponseText += parsedMessage.data;
+                setStreamedResponse(aiResponseText);
+                break;
+              case 'error':
+                throw new Error(parsedMessage.data);
+            }
+          } catch (e) {
+            console.error("Error parsing message:", e);
+          }
+        }
+      }
+  
+      let formattedResponse = (
+        <ReactMarkdown>{aiResponseText}</ReactMarkdown>
+      );
+  
+      let aiResponse: React.ReactNode = (
+        <div>
+          {formattedResponse}
+          {services && services.length > 0 && (
+            <div className="mt-4 w-full">
+              <article className="flex gap-2">
+                Check this out or <ViewMore data={services.slice(2)} />
+              </article>
+  
+              <div className="w-full grid grid-rows-2">
+                {services.slice(0, 2).map((service: ServiceItem) => (
+                  <LocalServiceCard
+                    key={service.place_id}
+                    name={service.name}
+                    address={service.address}
+                    rating={service.rating}
+                    user_ratings_total={service.user_ratings_total}
+                    place_id={service.place_id}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+  
+      setConversation([
+        ...newConversation,
+        { sender: "AI", text: aiResponse },
+      ]);
+  
+    } catch (error: any) {
+      console.error("Error sending message:", error.message);
+      let errorMessage = "Sorry, an error occurred while processing your request.";
+      setConversation([
+        ...newConversation,
+        { sender: "AI", text: errorMessage },
+      ]);
+    } finally {
+      setIsLoading(false);
+      setIsProcessing(false);
     }
   };
 
@@ -267,11 +276,10 @@ const Main: React.FC = () => {
                 isLoading={isLoading}
                 conversationEndRef={conversationEndRef}
               />
-             
             </>
           ))
         )}
-         {isLoading && <SkeletonCard />}
+        {isLoading && <SkeletonCard />}
       </div>
       <ChatInbox
         locationError={locationError}
@@ -288,118 +296,3 @@ const Main: React.FC = () => {
 };
 
 export default Main;
-
-const DefaultChatPage = ({ user }: { user: string }) => {
-  return (
-    <main>
-      <div className="text-[#c4c7c556] lg:text-6xl text-4xl font-semibold flex flex-col self-auto">
-        <h1 className="bg-clip-text text-transparent bg-gradient-to-r from-[#4b90ff] from-1% via-blue-600 via-5% to-15% to-[#ff5546]">
-          Hello {user}
-        </h1>
-        <p>What can I find for you today?</p>
-      </div>
-      <div className="mt-20">
-        <CardCarousel />
-      </div>
-    </main>
-  );
-};
-
-const ChatPage: React.FC<ChatPageProps> = ({
-  message,
-  index,
-  image,
-  logo,
-  isLoading,
-
-  conversationEndRef,
-}) => {
-  return (
-    <ScrollArea className="">
-      <main className=" w-full max-w-[900px] m-auto">
-        <div
-          key={index}
-          className="flex flex-col lg:flex-row lg:items-center gap-4  mb-8"
-        >
-          <Image
-            src={message.sender === "user" ? image : logo}
-            alt={message.sender === "user" ? "user" : "Loca AI image"}
-            width={50}
-            height={50}
-            className={cn(
-              message.sender === "user" ? "" : "",
-              "self-start rounded-full"
-            )}
-          />
-          <p className="text-white " onCopy={(e) => !!e}>
-            {message.text}
-          </p>
-          <div ref={conversationEndRef} />
-        </div>
-        {/* 
-        {isLoading && <SkeletonCard />} */}
-      </main>
-    </ScrollArea>
-  );
-};
-
-const ChatInbox: React.FC<ChatInboxProps> = ({
-  manualLocation,
-  setManualLocation,
-  textareaRef,
-  userMessage,
-  handleInput,
-  isProcessing,
-  handleSendMessage,
-  locationError,
-}) => {
-  return (
-    <main className="fixed bottom-0 py-4 px-4 left-[50%] right-[50%] transform -translate-x-1/2   bg-black shadow-2xl w-full max-w-[900px] m-auto">
-      {/* footer */}
-      <div className="">
-        {locationError && (
-          <div className="mb-2">
-            <p className="text-red-500 mb-1">{locationError}</p>
-            <input
-              type="text"
-              value={manualLocation}
-              onChange={(e) => setManualLocation(e.target.value)}
-              className="w-full max-w-4xl rounded-full h-10 bg-[#1e1f20] text-[#ccc] p-2 px-4 outline-none"
-              placeholder="Enter your full location "
-            />
-          </div>
-        )}
-        <div className="relative  flex items-center gap-2 w-full rounded-md bg-[#1e1f20] p-3">
-          <textarea
-            ref={textareaRef}
-            value={userMessage}
-            onChange={handleInput}
-            onKeyPress={(e) =>
-              e.key === "Enter" && !isProcessing && handleSendMessage()
-            }
-            className="flex-1 rounded-full bg-[#1e1f20] text-[#ccc] p-2 outline-none cursor-text text-md resize-none overflow-auto max-h-[6rem]"
-            placeholder={`Looking for local service provider? ${
-              isProcessing ? "processing...." : ""
-            }`}
-            disabled={isProcessing}
-            rows={1}
-            style={{ maxHeight: "6rem" }} // Adjust this value as needed
-          />
-          <SendHorizontalIcon
-            className={`text-[#ccc] cursor-pointer ${
-              isProcessing ? "opacity-50" : ""
-            }`}
-            onClick={() => !isProcessing && handleSendMessage()}
-          />
-        </div>
-        <p className="text-[#ccc] text-xs text-center mt-2">
-          <b>LOCA</b> use your input to fetch service. So long text will make
-          <b>LOCA</b> response to be inaccurate so let your input be
-          minimalistic to be able to get accurate services/response{" "}
-        </p>
-      </div>
-
-    
-    </main>
-  );
-};
