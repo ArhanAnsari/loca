@@ -16,7 +16,7 @@ const Sidebar = () => {
   return (
     <aside
       className={cn(
-        `bg-[#1e1f20] h-screen ${
+        `bg-[#1e1f20] min-h-[100vh] inline-flex ${
           extend ? "w-72 p-8" : "w-16 p-4 items-center"
         } flex flex-col justify-between transition-all duration-500 ease-in-out`
       )}

@@ -1,7 +1,7 @@
 import React, { ChangeEvent, useRef } from "react";
 import { auth } from "@/lib/firebase";
 import { SignOut } from "@/lib/signIn";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import local from "@/public/png/logo-black.png";
 import { useEffect, useState } from "react";
 import Logo from "@/public/png/logo-no-background.png";
@@ -14,7 +14,9 @@ import { cn } from "@/lib/utils";
 import ViewMore from "./viewmore";
 import { LocalServiceCard } from "./LocalServiceCard";
 import { CardCarousel } from "./CardCarousel";
+import { User } from "firebase/auth";
 
+import { ScrollArea } from "@/components/ui/scroll-area";
 type Location = {
   latitude: number | null;
   longitude: number | null;
@@ -249,51 +251,112 @@ const Main: React.FC = () => {
     setUserMessage(e.target.value);
   };
   return (
-    <main className="flex flex-col overflow-auto">
-      {/* center  */}
-      <header className="w-full max-w-4xl h-full max-h-[51rem] pb-20">
-        <div className="text-white flex-1 flex-col gap-12  px-6 ">
-          {conversation.length === 0 ? (
+    <main className="">
+      <div className="">
+        {conversation.length === 0 ? (
+          <DefaultChatPage user={user?.displayName?.slice(0, 3) || "Dev"} />
+        ) : (
+          conversation.map((message, index) => (
             <>
-              <div className="text-[#c4c7c556] lg:text-6xl text-4xl font-semibold flex flex-col self-auto">
-                <h1 className="bg-clip-text text-transparent bg-gradient-to-r from-[#4b90ff] from-1% via-blue-600 via-5% to-15% to-[#ff5546]">
-                  Hello {user?.displayName?.slice(0, 3) || "Dev"}
-                </h1>
-                <p>What can I find for you today?</p>
-              </div>
-              <div className="mt-20">
-                <CardCarousel />
-              </div>
-            </>
-          ) : (
-            conversation.map((message, index) => (
-              <div
+              <ChatPage
                 key={index}
-                className="flex flex-col lg:flex-row lg:items-center gap-4  mb-8"
-              >
-                <Image
-                  src={message.sender === "user" ? image : Logo}
-                  alt={message.sender === "user" ? "user" : "Loca AI image"}
-                  width={50}
-                  height={50}
-                  className={cn(
-                    message.sender === "user" ? "" : "",
-                    "self-start rounded-full"
-                  )}
-                />
-                <p className="text-white " onCopy={(e) => !!e}>
-                  {message.text}
-                </p>
-                <div ref={conversationEndRef} />
-              </div>
-            ))
-          )}
+                message={message}
+                index={index}
+                image={image}
+                logo={Logo}
+                isLoading={isLoading}
+                conversationEndRef={conversationEndRef}
+              />
+             
+            </>
+          ))
+        )}
+         {isLoading && <SkeletonCard />}
+      </div>
+      <ChatInbox
+        locationError={locationError}
+        isProcessing={isProcessing}
+        handleInput={handleInput}
+        textareaRef={textareaRef}
+        userMessage={userMessage}
+        handleSendMessage={handleSendMessage}
+        setManualLocation={setManualLocation}
+        manualLocation={manualLocation}
+      />
+    </main>
+  );
+};
 
-          {isLoading && <SkeletonCard />}
+export default Main;
+
+const DefaultChatPage = ({ user }: { user: string }) => {
+  return (
+    <main>
+      <div className="text-[#c4c7c556] lg:text-6xl text-4xl font-semibold flex flex-col self-auto">
+        <h1 className="bg-clip-text text-transparent bg-gradient-to-r from-[#4b90ff] from-1% via-blue-600 via-5% to-15% to-[#ff5546]">
+          Hello {user}
+        </h1>
+        <p>What can I find for you today?</p>
+      </div>
+      <div className="mt-20">
+        <CardCarousel />
+      </div>
+    </main>
+  );
+};
+
+const ChatPage: React.FC<ChatPageProps> = ({
+  message,
+  index,
+  image,
+  logo,
+  isLoading,
+
+  conversationEndRef,
+}) => {
+  return (
+    <ScrollArea className="">
+      <main className=" w-full max-w-[900px] m-auto">
+        <div
+          key={index}
+          className="flex flex-col lg:flex-row lg:items-center gap-4  mb-8"
+        >
+          <Image
+            src={message.sender === "user" ? image : logo}
+            alt={message.sender === "user" ? "user" : "Loca AI image"}
+            width={50}
+            height={50}
+            className={cn(
+              message.sender === "user" ? "" : "",
+              "self-start rounded-full"
+            )}
+          />
+          <p className="text-white " onCopy={(e) => !!e}>
+            {message.text}
+          </p>
+          <div ref={conversationEndRef} />
         </div>
-        {/* footer */}
-      </header>
-      <div className=" fixed  bg-black/80  bottom-0 w-full self-center max-w-[63rem] p-4">
+        {/* 
+        {isLoading && <SkeletonCard />} */}
+      </main>
+    </ScrollArea>
+  );
+};
+
+const ChatInbox: React.FC<ChatInboxProps> = ({
+  manualLocation,
+  setManualLocation,
+  textareaRef,
+  userMessage,
+  handleInput,
+  isProcessing,
+  handleSendMessage,
+  locationError,
+}) => {
+  return (
+    <main className="fixed bottom-0 py-4 px-4 left-[50%] right-[50%] transform -translate-x-1/2   bg-black shadow-2xl w-full max-w-[900px] m-auto">
+      {/* footer */}
+      <div className="">
         {locationError && (
           <div className="mb-2">
             <p className="text-red-500 mb-1">{locationError}</p>
@@ -306,7 +369,7 @@ const Main: React.FC = () => {
             />
           </div>
         )}
-        <div className="relative flex items-center gap-2 w-full rounded-md bg-[#1e1f20] p-3">
+        <div className="relative  flex items-center gap-2 w-full rounded-md bg-[#1e1f20] p-3">
           <textarea
             ref={textareaRef}
             value={userMessage}
@@ -329,16 +392,14 @@ const Main: React.FC = () => {
             onClick={() => !isProcessing && handleSendMessage()}
           />
         </div>
+        <p className="text-[#ccc] text-xs text-center mt-2">
+          <b>LOCA</b> use your input to fetch service. So long text will make
+          <b>LOCA</b> response to be inaccurate so let your input be
+          minimalistic to be able to get accurate services/response{" "}
+        </p>
       </div>
-      <div
-        className="flex gap-2 cursor-pointer absolute top-6 right-28 text-[#ccc] lg:hidden"
-        onClick={SignOut}
-      >
-        <LogOut />
-        <span className="animate-fadeIn xs:hidden">LogOut</span>
-      </div>
+
+    
     </main>
   );
 };
-
-export default Main;
