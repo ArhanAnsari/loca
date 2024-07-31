@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 
   if (!userMessage || !latitude || !longitude) {
     return new Response(
-      JSON.stringify({ error: "Missing required fields: userMessage, latitude, or longitude" }),
+      JSON.stringify({ error: "----- Missing required fields: userMessage, latitude, or longitude -----" }),
       { status: 400 }
     );
   }
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
         await writeChunk({ type: 'text', data: chunkText });
       }
     } catch (error) {
-      console.error("Server Error:", error);
+      console.error(" ---- Server Error:", error);
       await writeChunk({ type: 'error', data: "An error occurred while processing your request." });
     } finally {
       writer.close();

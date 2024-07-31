@@ -23,8 +23,8 @@ export const CardCarousel = () => {
     const image = user?.photoURL || local;
     const robotText = `Hi ${user?.displayName}, Yes! I found a great one nearby. Check it out and book now.`;
     return (
-      <div className="flex gap-12 items-center">
-        <div className="relative  bg-[#34343677] w-full max-w-[30rem] h-[21rem]">
+      <div className="flex gap-12 items-center justify-center">
+        <div className="relative  bg-[#34343677] w-full max-w-[35rem] h-[21rem]">
           <div className=" p-4 rounded-lg">
             <div className="flex gap-2">
               <Image
@@ -37,7 +37,7 @@ export const CardCarousel = () => {
   
               <div className="space-y-4">
                 {!showResponse && text && (
-                  <div className="mt-32 ml-20">
+                  <div className="mt-32 mx-auto">
                     <h1 className="animate-pulse bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-red-600 text-6xl">
                       Loca AI
                     </h1>
@@ -46,7 +46,7 @@ export const CardCarousel = () => {
                 {showResponse && (
                   <div className="text-[#caccce]">
                     <Typewriter
-                      onInit={(t) => {
+                      onInit={(t:any) => {
                         t.typeString(robotText)
                           .callFunction(() => {
                             setShowCard(true);
@@ -98,7 +98,7 @@ export const CardCarousel = () => {
   
               <div className="space-y-4">
                 {!showResponse && text && (
-                  <div className="mt-32 ml-20">
+                  <div className="mt-32 mx-auto">
                     <h1 className="animate-pulse bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-red-600 text-6xl">
                       Loca AI
                     </h1>

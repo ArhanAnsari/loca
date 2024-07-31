@@ -1,3 +1,4 @@
+"use client";
 import {
   Sheet,
   SheetContent,
@@ -16,21 +17,21 @@ const ViewMore: React.FC<ViewMoreProps> = ({ data }) => {
         <SheetTrigger>View More</SheetTrigger>
         <SheetContent className="bg-[#1e1f20] text-white border-none overflow-auto">
           <SheetHeader className="mt-5">
-            <SheetTitle className="text-white text-md">These are the Rest of Services find near you.</SheetTitle>
-            <SheetDescription>
-              
-            </SheetDescription>
-       
-                    {data.map((service:ServiceItem ) => (
-                      <LocalServiceCard
-                        key={service.place_id}
-                        name={service.name}
-                        address={service.address}
-                        rating={service.rating}
-                        user_ratings_total={service.user_ratings_total}
-                        place_id={service.place_id}
-                      />
-                    ))}
+            <SheetTitle className="text-white text-md">
+              These are the Rest of Services find near you.
+            </SheetTitle>
+            <SheetDescription></SheetDescription>
+
+            {data.map((service: ServiceItem) => (
+              <LocalServiceCard
+                key={service.place_id}
+                name={service.name}
+                address={service.address}
+                rating={service.rating}
+                user_ratings_total={service.user_ratings_total}
+                place_id={service.place_id}
+              />
+            ))}
           </SheetHeader>
         </SheetContent>
       </Sheet>

@@ -1,7 +1,8 @@
+"use client";
+
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-// import { useMediaQuery } from "@/hooks/use-media-query"
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,17 +28,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useMediaQuery } from "@custom-react-hooks/all";
+import { useClipboard } from "@mantine/hooks";
+import { CopyCheckIcon, CopyIcon, CopyleftIcon } from "lucide-react";
+import Link from "next/link";
+
 export function Booking({
   mapLink,
   locationName,
   providerName,
+  providerEmail,
+  providerWebsite,
+  providerPhone,
 }: {
   mapLink: string;
   locationName: string;
   providerName: string;
+  providerEmail?: string;
+  providerPhone?: string;
+  providerWebsite?: string;
 }) {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const [mapError, setMapError] = React.useState(false);
+  const clipboard = useClipboard({ timeout: 500 });
+  React.useEffect(() => {
+    // Reset error state when mapLink changes
+    setMapError(false);
+  }, [mapLink]);
+
+  const handleMapError = () => {
+    setMapError(true);
+  };
 
   if (isDesktop) {
     return (
@@ -61,40 +82,78 @@ export function Booking({
                   <Label htmlFor="link" className="text-center">
                     phone number
                   </Label>
-                  <Input
-                    id="link"
-                    defaultValue="1234567890"
-                    readOnly
-                    disabled
-                    className="hover:border-none bg-white/15 border-none outline-none rounded-tl-2xl "
-                  />
+                  <div className="relative">
+                    <Input
+                      id="link"
+                      defaultValue={providerPhone || "no phone number"}
+                      readOnly
+                      // disabled
+                      className="relative hover:border-none bg-white/15 border-none outline-none rounded-tl-2xl "
+                    />
+                    <div className="absolute bottom-2 text-md  right-4">
+                      {clipboard.copied ? (
+                        <CopyCheckIcon />
+                      ) : (
+                        <CopyIcon
+                          onClick={() => clipboard.copy(providerPhone)}
+                        />
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="link" className="text-center">
                     website
                   </Label>
-                  <Input
-                    id="link"
-                    defaultValue="1234567890"
-                    readOnly
-                    disabled
-                    className="outline-none bg-white/15 border-none  rounded-tr-2xl"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="link"
+                      defaultValue={providerEmail || "No website provided"}
+                      readOnly
+                      disabled
+                      className="relative outline-none bg-white/15 border-none  rounded-tr-2xl"
+                    />
+                    <div className="absolute bottom-2 right-4">
+                      {clipboard.copied ? (
+                        <CopyCheckIcon />
+                      ) : (
+                        <CopyIcon
+                          onClick={() => clipboard.copy(providerEmail)}
+                        />
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <span>{mapLink}</span>
+            -{" "}
             <div className="">
-              <iframe
-                title={locationName}
-                src={mapLink}
-                width="100%"
-                height="200"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="eager"
-                // referrerPolicy="no-referrer-when-downgrade"
-              ></iframe>
+              {!mapError ? (
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.5804166329717!2d3.4116896000000003!3d6.4478794!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8b5fc7f5bc75%3A0xb2cb3f94ff02c02f!2sAyotech%20plumbing%20works!5e0!3m2!1sen!2sng!4v1722315870808!5m2!1sen!2sng"
+                  width="100%"
+                  height="200"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="eager"
+                  onError={handleMapError}
+                  title={`Map of ${locationName || "service location"}`}
+                  // referrerpolicy="no-referrer-when-downgrade"
+                ></iframe>
+              ) : (
+                <div className="bg-gray-100 p-4 text-center">
+                  <p>Unable to load map. Please check the link below:</p>
+                  <a
+                    href={mapLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                  >
+                    Open Map
+                  </a>
+                </div>
+              )}
+
               <div className=" rounded-br-2xl rounded-bl-2xl text-1xl text-white  flex items-center p-4 bg-white/15">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -126,16 +185,16 @@ export function Booking({
             <Separator className="w-44" />
           </div>
           <div className="mt flex flex-col gap-2">
-            <span className="text-sm underline">
+            <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 text-black border-none outline-none">
+              <Link href="/chat/booking">Book by Loca</Link>
+            </Button>
+            <span className="text-xs underline text-center">
               ReadMore on How we use Loca to Book you a service provider
             </span>
-            <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 text-black border-none outline-none">
-              Book by Loca
-            </Button>
-            <span className="text-xs text-center">
+            {/* <span className="text-xs text-center">
               Booking by loca is still in development and will be available
               soon..
-            </span>
+            </span> */}
           </div>
           <DialogFooter className="sm:justify-start">
             <DialogClose asChild>
@@ -169,37 +228,74 @@ export function Booking({
                 <Label htmlFor="link" className="text-center">
                   phone number
                 </Label>
-                <Input
-                  id="link"
-                  defaultValue="1234567890"
-                  readOnly
-                  className="outline-none bg-white/15 border-none rounded-tl-2xl "
-                />
+                <div className="relative">
+                  <Input
+                    id="link"
+                    defaultValue={providerPhone || "no phone number"}
+                    readOnly
+                    // disabled
+                    className="relative hover:border-none bg-white/15 border-none outline-none rounded-tl-2xl "
+                  />
+                  <div className="absolute bottom-2 text-md  right-4">
+                    {clipboard.copied ? (
+                      <CopyCheckIcon />
+                    ) : (
+                      <CopyIcon onClick={() => clipboard.copy(providerPhone)} />
+                    )}
+                  </div>
+                </div>
               </div>
               <div>
                 <Label htmlFor="link" className="text-center">
                   website
                 </Label>
-                <Input
-                  id="link"
-                  defaultValue="1234567890"
-                  readOnly
-                  className="outline-none bg-white/15 border-none  rounded-tr-2xl"
-                />
+                <div className="relative">
+                  <Input
+                    id="link"
+                    defaultValue={providerEmail || "No website provided"}
+                    readOnly
+                    disabled
+                    className="relative outline-none bg-white/15 border-none  rounded-tr-2xl"
+                  />
+                  <div className="absolute bottom-2 right-4">
+                    {clipboard.copied ? (
+                      <CopyCheckIcon />
+                    ) : (
+                      <CopyIcon onClick={() => clipboard.copy(providerEmail)} />
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+          -{" "}
           <div className="">
-            <iframe
-              title={locationName}
-              src={mapLink}
-              width="100%"
-              height="200"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="eager"
-              // referrerPolicy="no-referrer-when-downgrade"
-            ></iframe>
+            {!mapError ? (
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.5804166329717!2d3.4116896000000003!3d6.4478794!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8b5fc7f5bc75%3A0xb2cb3f94ff02c02f!2sAyotech%20plumbing%20works!5e0!3m2!1sen!2sng!4v1722315870808!5m2!1sen!2sng"
+                width="100%"
+                height="200"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="eager"
+                onError={handleMapError}
+                title={`Map of ${locationName || "service location"}`}
+                // referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
+            ) : (
+              <div className="bg-gray-100 p-4 text-center">
+                <p>Unable to load map. Please check the link below:</p>
+                <a
+                  href={mapLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline"
+                >
+                  Open Map
+                </a>
+              </div>
+            )}
+
             <div className=" rounded-br-2xl rounded-bl-2xl text-1xl text-white  flex items-center p-4 bg-white/15">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -231,15 +327,19 @@ export function Booking({
           <Separator className="w-44" />
         </div>
         <div className="mt flex flex-col gap-2">
-          <span className="text-sm underline">
-            ReadMore on How we use Loca to Book you a service provider
-          </span>
           <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 text-black border-none outline-none">
-            Book by Loca
+            <Link href="/chat/booking">Book by Loca</Link>
           </Button>
-          <span className="text-xs text-center">
-            Booking by loca is still in development and will be available soon..
-          </span>
+          <Link
+            href="/faqs"
+            className="text-xs underline text-center cursor-pointer"
+          >
+            ReadMore on How we use Loca to Book you a service provider
+          </Link>
+          {/* <span className="text-xs text-center">
+              Booking by loca is still in development and will be available
+              soon..
+            </span> */}
         </div>
         <DrawerFooter className="pt-2">
           <DrawerClose asChild>

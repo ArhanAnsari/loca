@@ -1,3 +1,4 @@
+"use client"
 import React, { ChangeEvent, useRef } from "react";
 import { auth } from "@/lib/firebase";
 import { SignOut } from "@/lib/signIn";
@@ -20,10 +21,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { DefaultChatPage } from "./Deafultchatpage";
 import { ChatPage } from "./chatpage";
 import { ChatInbox } from "./chatInbox";
-type Location = {
+
+interface Location {
   latitude: number | null;
   longitude: number | null;
-};
+}
+
+interface ConversationItem {
+  sender: "user" | "AI";
+  text: string | React.ReactNode;
+}
 
 const Main: React.FC = () => {
   const [user, setUser] = useState(auth.currentUser);
@@ -38,7 +45,11 @@ const Main: React.FC = () => {
   const [manualLocation, setManualLocation] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [streamedResponse, setStreamedResponse] = useState("");
+  const [services, setServices] = useState<ServiceItem[]>([]);
+
   const conversationEndRef = useRef<HTMLDivElement>(null);
+
+  const getLocationMap = location;
 
   const scrollToBottom = () => {
     conversationEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -86,35 +97,33 @@ const Main: React.FC = () => {
   // handler for manual location if error occur on automatic location
   const handleManualLocationSubmit = async () => {
     if (!manualLocation.trim()) {
-      setLocationError("please enter a location.");
-      return false;
+      setLocationError("Please enter a location.");
+      return;
     }
 
     setIsProcessing(true);
     try {
-      const res: AxiosResponse<any, any> = await axios.get(
+      const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
           manualLocation
         )}&key=${process.env.GOOGLE_PLACES_API_KEY}`
       );
+      const data = await response.json();
 
-      if (res.data.results && res.data.results.length > 0) {
-        const { lat, lag } = res.data.result[0].geometry.location;
-        setLocation({ latitude: lat, longitude: lag });
+      if (data.results && data.results.length > 0) {
+        const { lat, lng } = data.results[0].geometry.location;
+        setLocation({ latitude: lat, longitude: lng });
         setLocationError(null);
-        return true;
       } else {
         setLocationError(
           "Unable to find the location. Please try a more specific address."
         );
-        return false;
       }
     } catch (error) {
       console.error("Error geocoding manual location:", error);
       setLocationError(
-        "Error processing location. Please try again or use a different address"
+        "Error processing location. Please try again or use a different address."
       );
-      return false;
     } finally {
       setIsProcessing(false);
     }
@@ -127,18 +136,21 @@ const Main: React.FC = () => {
   const handleSendMessage = async () => {
     if (!userMessage.trim() || isProcessing) return;
     if (userMessage.length > 500) {
-      setLocationError("Input is too long. Please keep your message under 500 characters.");
+      setLocationError(
+        "Input is too long. Please keep your message under 500 characters."
+      );
       return;
     }
     setIsProcessing(true);
     if (!location.latitude || !location.longitude) {
       const locationSubmitted = await handleManualLocationSubmit();
+      // @ts-ignore
       if (!locationSubmitted) {
         setIsProcessing(false);
         return;
       }
     }
-  
+
     const newConversation: ConversationItem[] = [
       ...conversation,
       { sender: "user", text: userMessage },
@@ -146,8 +158,9 @@ const Main: React.FC = () => {
     setConversation(newConversation);
     setUserMessage("");
     setIsLoading(true);
-    setStreamedResponse('');
-  
+    setStreamedResponse("");
+    setServices([]);
+
     try {
       const response = await fetch("/api/gemini", {
         method: "POST",
@@ -158,37 +171,36 @@ const Main: React.FC = () => {
           longitude: location.longitude,
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const reader = response.body?.getReader();
       if (!reader) {
         throw new Error("Failed to get response reader");
       }
-  
-      let services: any[] = [];
-      let aiResponseText = '';
-  
+
+      let aiResponseText = "";
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = new TextDecoder().decode(value);
-        const messages = chunk.split('\n').filter(Boolean);
-  
+        const messages = chunk.split("\n").filter(Boolean);
+
         for (const message of messages) {
           try {
             const parsedMessage = JSON.parse(message);
             switch (parsedMessage.type) {
-              case 'services':
-                services = parsedMessage.data;
+              case "services":
+                setServices(parsedMessage.data);
                 break;
-              case 'text':
+              case "text":
                 aiResponseText += parsedMessage.data;
-                setStreamedResponse(aiResponseText);
+                setStreamedResponse((prev) => prev + parsedMessage.data);
                 break;
-              case 'error':
+              case "error":
                 throw new Error(parsedMessage.data);
             }
           } catch (e) {
@@ -196,11 +208,9 @@ const Main: React.FC = () => {
           }
         }
       }
-  
-      let formattedResponse = (
-        <ReactMarkdown>{aiResponseText}</ReactMarkdown>
-      );
-  
+
+      const formattedResponse = <ReactMarkdown>{aiResponseText}</ReactMarkdown>;
+
       let aiResponse: React.ReactNode = (
         <div>
           {formattedResponse}
@@ -209,7 +219,6 @@ const Main: React.FC = () => {
               <article className="flex gap-2">
                 Check this out or <ViewMore data={services.slice(2)} />
               </article>
-  
               <div className="w-full grid grid-rows-2">
                 {services.slice(0, 2).map((service: ServiceItem) => (
                   <LocalServiceCard
@@ -219,6 +228,9 @@ const Main: React.FC = () => {
                     rating={service.rating}
                     user_ratings_total={service.user_ratings_total}
                     place_id={service.place_id}
+                    phone_number={service.phone_number}
+                    website={service.website}
+                    email={service.email}
                   />
                 ))}
               </div>
@@ -226,15 +238,12 @@ const Main: React.FC = () => {
           )}
         </div>
       );
-  
-      setConversation([
-        ...newConversation,
-        { sender: "AI", text: aiResponse },
-      ]);
-  
+
+      setConversation([...newConversation, { sender: "AI", text: aiResponse }]);
     } catch (error: any) {
       console.error("Error sending message:", error.message);
-      let errorMessage = "Sorry, an error occurred while processing your request.";
+      let errorMessage =
+        "Sorry, an error occurred while processing your request.";
       setConversation([
         ...newConversation,
         { sender: "AI", text: errorMessage },

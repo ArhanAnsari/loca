@@ -1,12 +1,12 @@
 
 
-interface ServiceItem {
-  name: string;
-  address: string;
-  rating: number;
-  user_ratings_total: number;
-  place_id: string;
-}
+// interface ServiceItem {
+//   name: string;
+//   address: string;
+//   rating: number;
+//   user_ratings_total: number;
+//   place_id: string;
+// }
 
 interface LocalServiceCardProps {
   name: string;
@@ -14,12 +14,12 @@ interface LocalServiceCardProps {
   rating: number;
   user_ratings_total: number;
   place_id: string;
+  phone_number?: string;
+  website?: string;
+  email?: string;
 }
 
-type ConversationItem = {
-  sender: string;
-  text: React.ReactNode;
-};
+
 
 interface ViewMoreProps {
   data: ServiceItem[];
@@ -44,4 +44,20 @@ interface ChatInboxProps {
   isProcessing: boolean;
   handleSendMessage: () => Promise<void>;
   setManualLocation: React.Dispatch<React.SetStateAction<string>>;
+}
+
+interface Location {
+  latitude: number | null;
+  longitude: number | null;
+};
+
+interface ServiceItem {
+  place_id: string;
+  name: string;
+  address: string;
+  rating: number;
+  user_ratings_total: number;
+  phone_number?: string;
+  website?: string;
+  email?: string;
 }

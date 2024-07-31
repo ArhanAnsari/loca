@@ -8,6 +8,9 @@ export const LocalServiceCard: React.FC<LocalServiceCardProps> = ({
     rating,
     user_ratings_total,
     place_id,
+    phone_number,
+    website,
+    email,
   }) => {
     return (
       <div className="  border-[2px] border-[#caccce] border-dotted p-4 space-y-2 mb-4 w-full lg:max-w-[410px] text-left">
@@ -25,7 +28,7 @@ export const LocalServiceCard: React.FC<LocalServiceCardProps> = ({
           </Link>
           Book Now
         </Button> */}
-        <Booking mapLink={`https://www.google.com/maps/place/?q=place_id:${place_id}`} locationName={address} providerName={name}/>
+        <Booking mapLink={`https://www.google.com/maps/place/?q=place_id:${place_id}`} locationName={address} providerName={name} providerPhone={phone_number} providerEmail={email} providerWebsite={website}/>
       </div>
     );
   };

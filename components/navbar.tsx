@@ -24,9 +24,10 @@ export default function Navbar() {
   }
   return (
     <div className="flex justify-between items-center p-5">
-      <span className="text-[#caccce] font-medium text-2xl">Loca</span>
+      <span className="text-[#caccce] font-medium text-2xl"><Link href="/">LOCA</Link></span>
       <nav className="flex gap-4 items-center">
-        <Link href={"/"} className="font-bold text-white">FAQ</Link>
+        <Link href={"/faq"} className="font-bold text-white">FAQ</Link>
+
         {!user?(
               <Button onClick={SignIn} className="bg-blue-400 rounded-full p-6 hover:bg-blue-300">SignIn </Button>
             ):(
