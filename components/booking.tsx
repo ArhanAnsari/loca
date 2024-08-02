@@ -66,7 +66,7 @@ export function Booking({
       <Dialog>
         <DialogTrigger asChild>
           <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 text-black border-none outline-none">
-            Booking
+            Book Now
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-md bg-[#1e1f20] border-none text-white">
@@ -213,7 +213,7 @@ export function Booking({
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 text-black border-none outline-none">
-          Book
+          Book Now
         </Button>
       </DrawerTrigger>
       <DrawerContent className="p-4 bg-[#1e1f20] text-white border-none">

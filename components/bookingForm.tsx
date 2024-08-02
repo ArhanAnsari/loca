@@ -66,7 +66,7 @@ export function BookingForm() {
         onClose={() => setOpened(false)}
         title="Booking Form"
         padding="xl"
-        size="25%"
+        // size="25%"
         styles={{
           content: {
             backgroundColor: '#000'
