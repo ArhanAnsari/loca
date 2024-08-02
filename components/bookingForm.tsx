@@ -75,64 +75,65 @@ export function BookingForm() {
             backgroundColor: '#000'
           }
         }}
-       
-      transitionProps={{
-        transition: "rotate-left",
-        duration: 150,
-        timingFunction: "linear",
-      }}
-      className=" text-white"
-      overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
+
+        transitionProps={{
+          transition: "rotate-left",
+          duration: 150,
+          timingFunction: "linear",
+        }}
+        className=" text-white"
+        overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
       >
-      <div className="">
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <Fieldset
-            legend="Please fill in the form"
-            styles={{
-              root: { backgroundColor: "black", borderColor: "white" },
-              legend: { color: "white" },
-            }}
-          >
-            <TextInput
-              withAsterisk
-              label="Your name"
-              placeholder="Your name"
-              {...form.getInputProps("name")}
-              styles={{ label: { color: "white" }, input: { color: "white", backgroundColor: "#333" } }}
-            />
-            <TextInput
-              withAsterisk
-              label="Email"
-              placeholder="Email"
-              mt="md"
-              {...form.getInputProps("email")}
-              styles={{ label: { color: "white" }, input: { color: "white", backgroundColor: "#333" } }}
-            />
-            <Textarea
-              withAsterisk
-              label="Description"
-              description="Describe the type of services you want"
-              placeholder="Describe your services here"
-              autosize
-              minRows={2}
-              maxRows={4}
-              {...form.getInputProps("message")}
+        <div className="">
+          <form onSubmit={form.onSubmit(handleSubmit)}>
+            <Fieldset
+              legend="Please fill in the form"
               styles={{
-                label: { color: "white" },
-                description: { color: "white" },
-                input: { color: "white", backgroundColor: "#333" }
+                root: { backgroundColor: "black", borderColor: "white" },
+                legend: { color: "white" },
               }}
-            />
-          </Fieldset>
-          <Button
-            type="submit"
-            className="bg-blue-400 rounded-full p-8 hover:bg-blue-300 text-black border-none outline-none mt-8 w-full"
-          >
-            Submit
-          </Button>
-        </form>
-      </div>
-    </Drawer >
+            >
+              <TextInput
+                withAsterisk
+                label="Your name"
+                placeholder="Your name"
+                {...form.getInputProps("name")}
+                styles={{ label: { color: "white" }, input: { color: "white", backgroundColor: "#333" } }}
+              />
+              <TextInput
+                withAsterisk
+                label="Email"
+                placeholder="Email"
+                mt="md"
+                {...form.getInputProps("email")}
+                styles={{ label: { color: "white" }, input: { color: "white", backgroundColor: "#333" } }}
+              />
+              <Textarea
+                withAsterisk
+                label="Description"
+                description="Describe the type of services you want"
+                placeholder="Describe your services here"
+                autosize
+                minRows={2}
+                maxRows={4}
+                {...form.getInputProps("message")}
+                styles={{
+                  label: { color: "white" },
+                  description: { color: "white" },
+                  input: { color: "white", backgroundColor: "#333" }
+                }}
+              />
+            </Fieldset>
+            <Button
+              type="submit"
+              className="bg-blue-400 rounded-full p-8 hover:bg-blue-300 text-black border-none outline-none mt-8 w-full"
+            >
+              Submit
+            </Button>
+          </form>
+         
+        </div>
+      </Drawer >
     </>
   );
 }

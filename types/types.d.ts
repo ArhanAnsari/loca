@@ -57,3 +57,13 @@ interface ServiceItem {
   website?: string;
   email?: string;
 }
+
+interface CustomInputProps {
+  label: string;
+  name: string;
+  type: string;
+  placeholder: string;
+  value: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  error?: string;
+}
