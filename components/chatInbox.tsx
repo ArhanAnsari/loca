@@ -11,7 +11,7 @@ export const ChatInbox: React.FC<ChatInboxProps> = ({
   locationError,
 }) => {
   return (
-    <main className="fixed bottom-0 py-4 px-4 left-[50%] right-[50%] transform -translate-x-1/2   bg-black shadow-2xl w-full max-w-[900px] m-auto">
+    <main className="fixed bottom-0 py-4 px-4 left-[50%] right-[50%] transform -translate-x-1/2  shadow-2xl w-full max-w-max ">
       {/* footer */}
       <div className="">
         {locationError && (

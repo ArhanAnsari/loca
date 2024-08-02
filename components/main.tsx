@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { ChangeEvent, useRef } from "react";
 import { auth } from "@/lib/firebase";
 import local from "@/public/png/logo-black.png";
@@ -8,7 +8,6 @@ import { onAuthStateChanged } from "firebase/auth";
 import { SkeletonCard } from "./loading";
 import ReactMarkdown from "react-markdown";
 import ViewMore from "./viewmore";
-
 
 import { DefaultChatPage } from "./Deafultchatpage";
 import { ChatPage } from "./chatpage";
@@ -66,14 +65,14 @@ const Main: React.FC = () => {
           (error: GeolocationPositionError) => {
             console.error("Error getting geolocation:", error.message);
             setLocationError(
-              `Unable to get your location. Please ensure location services are enabled.`
+              `Unable to get your location. Please ensure location services are enabled.`,
             );
           },
-          { timeout: 10000, maximumAge: 60000, enableHighAccuracy: true }
+          { timeout: 10000, maximumAge: 60000, enableHighAccuracy: true },
         );
       } else {
         setLocationError(
-          "Geolocation is not supported by this browser. Please enter your location manually"
+          "Geolocation is not supported by this browser. Please enter your location manually",
         );
       }
     };
@@ -98,8 +97,8 @@ const Main: React.FC = () => {
     try {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-          manualLocation
-        )}&key=${process.env.GOOGLE_PLACES_API_KEY}`
+          manualLocation,
+        )}&key=${process.env.GOOGLE_PLACES_API_KEY}`,
       );
       const data = await response.json();
 
@@ -109,13 +108,13 @@ const Main: React.FC = () => {
         setLocationError(null);
       } else {
         setLocationError(
-          "Unable to find the location. Please try a more specific address."
+          "Unable to find the location. Please try a more specific address.",
         );
       }
     } catch (error) {
       console.error("Error geocoding manual location:", error);
       setLocationError(
-        "Error processing location. Please try again or use a different address."
+        "Error processing location. Please try again or use a different address.",
       );
     } finally {
       setIsProcessing(false);
@@ -130,7 +129,7 @@ const Main: React.FC = () => {
     if (!userMessage.trim() || isProcessing) return;
     if (userMessage.length > 500) {
       setLocationError(
-        "Input is too long. Please keep your message under 500 characters."
+        "Input is too long. Please keep your message under 500 characters.",
       );
       return;
     }
@@ -143,7 +142,7 @@ const Main: React.FC = () => {
         return;
       }
     }
-  
+
     const newConversation: ConversationItem[] = [
       ...conversation,
       { sender: "user", text: userMessage },
@@ -153,30 +152,31 @@ const Main: React.FC = () => {
     setIsLoading(true);
     setStreamedResponse("");
     setServices([]);
-  
+
     try {
       const response = await fetch("/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           userMessage,
           latitude: location.latitude,
           longitude: location.longitude,
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const reader = response.body?.getReader();
       if (!reader) {
         throw new Error("Failed to get response reader");
       }
-  
+
       let aiResponseText = "";
       let receivedServices: ServiceItem[] = [];
-  
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -202,9 +202,9 @@ const Main: React.FC = () => {
           }
         }
       }
-  
+
       const formattedResponse = <ReactMarkdown>{aiResponseText}</ReactMarkdown>;
-  
+
       let aiResponse: React.ReactNode = (
         <div>
           {formattedResponse}
@@ -232,7 +232,7 @@ const Main: React.FC = () => {
           )}
         </div>
       );
-  
+
       setConversation([...newConversation, { sender: "AI", text: aiResponse }]);
     } catch (error: any) {
       console.error("Error sending message:", error.message);
@@ -262,28 +262,28 @@ const Main: React.FC = () => {
   const handleInput = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setUserMessage(e.target.value);
   };
-  return (
-    <main className="">
-      <div className="">
-        {conversation.length === 0 ? (
-          <DefaultChatPage user={user?.displayName?.slice(0, 3) || "Dev"} />
-        ) : (
-          conversation.map((message, index) => (
-            <>
-              <ChatPage
-                key={index}
-                message={message}
-                index={index}
-                image={image}
-                logo={Logo}
-                isLoading={isLoading}
-                conversationEndRef={conversationEndRef}
-              />
-            </>
-          ))
-        )}
-        {isLoading && <SkeletonCard />}
-      </div>
+return (
+  <div className=" w-full block m-auto max-w-5xl h-full">
+    <div className="">
+      {conversation.length === 0 ? (
+        <DefaultChatPage user={user?.displayName?.slice(0, 3) || "Dev"} />
+      ) : (
+        conversation.map((message, index) => (
+          <ChatPage
+            key={index}
+            message={message}
+            index={index}
+            image={image}
+            logo={Logo}
+            isLoading={isLoading}
+            conversationEndRef={conversationEndRef}
+          />
+        ))
+      )}
+      {isLoading && <SkeletonCard />}
+      <div ref={conversationEndRef} />
+    </div>
+    {/* <div className="sticky bottom-0  bg-green-500 p-4"> */}
       <ChatInbox
         locationError={locationError}
         isProcessing={isProcessing}
@@ -294,8 +294,9 @@ const Main: React.FC = () => {
         setManualLocation={setManualLocation}
         manualLocation={manualLocation}
       />
-    </main>
-  );
+    {/* </div> */}
+  </div>
+);
 };
 
 export default Main;

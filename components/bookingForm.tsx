@@ -67,54 +67,72 @@ export function BookingForm() {
         title="Booking Form"
         padding="xl"
         size="25%"
-        style={{ backgroundColor: "black",  }}
-        transitionProps={{
-          transition: "rotate-left",
-          duration: 150,
-          timingFunction: "linear",
+        styles={{
+          content: {
+            backgroundColor: '#000'
+          },
+          header: {
+            backgroundColor: '#000'
+          }
         }}
-        className="bg-black"
-        overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
+       
+      transitionProps={{
+        transition: "rotate-left",
+        duration: 150,
+        timingFunction: "linear",
+      }}
+      className=" text-white"
+      overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
       >
-        <div className="">
-          <form onSubmit={form.onSubmit(handleSubmit)}>
-            <Fieldset
-              legend="Please fill in the form"
-              style={{ backgroundColor: "#1111", borderColor: "white" }}
-            >
-              <TextInput
-                withAsterisk
-                label="Your name"
-                placeholder="Your name"
-                {...form.getInputProps("name")}
-              />
-              <TextInput
-                withAsterisk
-                label="Email"
-                placeholder="Email"
-                mt="md"
-                {...form.getInputProps("email")}
-              />
-              <Textarea
-                withAsterisk
-                label="Description"
-                description="Describe the type of services you want"
-                placeholder="Describe your services here"
-                autosize
-                minRows={2}
-                maxRows={4}
-                {...form.getInputProps("message")}
-              />
-            </Fieldset>
-            <Button
-              type="submit"
-              className="bg-blue-400 rounded-full p-8 hover:bg-blue-300 text-black border-none outline-none mt-8 w-full"
-            >
-              Submit
-            </Button>
-          </form>
-        </div>
-      </Drawer>
+      <div className="">
+        <form onSubmit={form.onSubmit(handleSubmit)}>
+          <Fieldset
+            legend="Please fill in the form"
+            styles={{
+              root: { backgroundColor: "black", borderColor: "white" },
+              legend: { color: "white" },
+            }}
+          >
+            <TextInput
+              withAsterisk
+              label="Your name"
+              placeholder="Your name"
+              {...form.getInputProps("name")}
+              styles={{ label: { color: "white" }, input: { color: "white", backgroundColor: "#333" } }}
+            />
+            <TextInput
+              withAsterisk
+              label="Email"
+              placeholder="Email"
+              mt="md"
+              {...form.getInputProps("email")}
+              styles={{ label: { color: "white" }, input: { color: "white", backgroundColor: "#333" } }}
+            />
+            <Textarea
+              withAsterisk
+              label="Description"
+              description="Describe the type of services you want"
+              placeholder="Describe your services here"
+              autosize
+              minRows={2}
+              maxRows={4}
+              {...form.getInputProps("message")}
+              styles={{
+                label: { color: "white" },
+                description: { color: "white" },
+                input: { color: "white", backgroundColor: "#333" }
+              }}
+            />
+          </Fieldset>
+          <Button
+            type="submit"
+            className="bg-blue-400 rounded-full p-8 hover:bg-blue-300 text-black border-none outline-none mt-8 w-full"
+          >
+            Submit
+          </Button>
+        </form>
+      </div>
+    </Drawer >
     </>
   );
 }

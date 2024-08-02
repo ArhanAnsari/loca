@@ -1,30 +1,53 @@
 import { GoogleAuthProvider, signOut, signInWithPopup } from "firebase/auth";
-import { auth } from "./firebase";
+import { auth, db } from "./firebase";
+import { doc, setDoc } from "firebase/firestore";
 import { setCookie, deleteCookie } from "cookies-next";
 import toast from "react-hot-toast";
 
-const signIn = () => {
+const signIn = async () => {
   const provider = new GoogleAuthProvider();
 
-  signInWithPopup(auth, provider)
-    .then((res) => {
-      const credential = GoogleAuthProvider.credentialFromResult(res);
-      const token = credential?.accessToken;
-      const user = res.user;
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    const idToken = await user.getIdToken();
 
-      setCookie("token", token, {
-        maxAge: 60 * 3 * 24,
-        expires: new Date(60 * 3 * 24), // should be a Date object relative to now
+    const response = await fetch("/api/create-session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ idToken }),
+    });
+
+    if (response.ok) {
+      // Store user data in Firestore
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          name: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+          // Add any other fields you want to store
+        },
+        { merge: true },
+      );
+
+      setCookie("token", idToken, {
+        maxAge: 60 * 60 * 24 * 3, // 3 days in seconds
+        expires: new Date(Date.now() + 60 * 60 * 24 * 3 * 1000), // 3 days from now
       });
 
       window.localStorage.setItem("user", JSON.stringify(user));
       toast.success("SignIn successful");
       window.location.href = "/chat";
-    })
-    .catch((error) => {
-      console.error(error);
-      toast.error("SignIn failed");
-    });
+    } else {
+      throw new Error("Failed to create session");
+    }
+  } catch (error) {
+    console.error(error);
+    toast.error("SignIn failed");
+  }
 };
 
 const SignOut = () => {

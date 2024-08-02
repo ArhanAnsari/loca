@@ -189,7 +189,7 @@ export function Booking({
             {/* <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 text-black border-none outline-none">
               <Link href="/chat/booking">Book by Loca</Link>
             </Button> */}
-            <BookingForm/>
+            <BookingForm />
             <span className="text-xs underline text-center">
               ReadMore on How we use Loca to Book you a service provider
             </span>
@@ -332,7 +332,7 @@ export function Booking({
           {/* <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 text-black border-none outline-none">
             <Link href="/chat/booking">Book by Loca</Link>
           </Button> */}
-          <BookingForm/>
+          <BookingForm />
           <Link
             href="/faqs"
             className="text-xs underline text-center cursor-pointer"

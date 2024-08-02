@@ -12,7 +12,7 @@ export const ChatPage: React.FC<ChatPageProps> = ({
 }) => {
   return (
     <ScrollArea className="">
-      <main className=" w-full max-w-[900px] m-auto">
+      <main className="">
         <div
           key={index}
           className="flex flex-col lg:flex-row lg:items-center gap-4  mb-8"

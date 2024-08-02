@@ -3,7 +3,7 @@ import { CardCarousel } from "./CardCarousel";
 export const DefaultChatPage = ({ user }: { user: string }) => {
   return (
     <main>
-      <div className="text-[#c4c7c556] lg:text-6xl text-4xl font-semibold flex flex-col self-auto">
+      <div className="text-[#c4c7c556] lg:text-6xl text-4xl font-semibold flex flex-col xl:ml-24">
         <h1 className="bg-clip-text text-transparent bg-gradient-to-r from-[#4b90ff] from-1% via-blue-600 via-5% to-15% to-[#ff5546]">
           Hello {user}
         </h1>
