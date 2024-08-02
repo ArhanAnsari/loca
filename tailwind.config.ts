@@ -10,18 +10,18 @@ const config = {
       "./app/**/*.{ts,tsx}",
       "./src/**/*.{ts,tsx}",
     ],
-    extract
+    extract,
   },
   prefix: "",
   theme: {
     container: {
       center: true,
       padding: {
-        DEFAULT: '1rem',
-        sm: '2rem',
-        lg: '4rem',
-        xl: '5rem',
-        '2xl': '6rem',
+        DEFAULT: "1rem",
+        sm: "2rem",
+        lg: "4rem",
+        xl: "5rem",
+        "2xl": "6rem",
       },
     },
     extend: {
@@ -79,7 +79,6 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
-      
     },
   },
   plugins: [require("tailwindcss-animate"), fluid],

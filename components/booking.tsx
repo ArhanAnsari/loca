@@ -31,6 +31,7 @@ import { useMediaQuery } from "@custom-react-hooks/all";
 import { useClipboard } from "@mantine/hooks";
 import { CopyCheckIcon, CopyIcon, CopyleftIcon } from "lucide-react";
 import Link from "next/link";
+import { BookingForm } from "./bookingForm";
 
 export function Booking({
   mapLink,
@@ -185,9 +186,10 @@ export function Booking({
             <Separator className="w-44" />
           </div>
           <div className="mt flex flex-col gap-2">
-            <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 text-black border-none outline-none">
+            {/* <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 text-black border-none outline-none">
               <Link href="/chat/booking">Book by Loca</Link>
-            </Button>
+            </Button> */}
+            <BookingForm/>
             <span className="text-xs underline text-center">
               ReadMore on How we use Loca to Book you a service provider
             </span>
@@ -327,9 +329,10 @@ export function Booking({
           <Separator className="w-44" />
         </div>
         <div className="mt flex flex-col gap-2">
-          <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 text-black border-none outline-none">
+          {/* <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 text-black border-none outline-none">
             <Link href="/chat/booking">Book by Loca</Link>
-          </Button>
+          </Button> */}
+          <BookingForm/>
           <Link
             href="/faqs"
             className="text-xs underline text-center cursor-pointer"

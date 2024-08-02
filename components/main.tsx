@@ -1,26 +1,19 @@
 "use client"
 import React, { ChangeEvent, useRef } from "react";
 import { auth } from "@/lib/firebase";
-import { SignOut } from "@/lib/signIn";
-import Image, { StaticImageData } from "next/image";
 import local from "@/public/png/logo-black.png";
 import { useEffect, useState } from "react";
 import Logo from "@/public/png/logo-no-background.png";
-import { SendHorizontalIcon, LogOut, PlusIcon } from "lucide-react";
 import { onAuthStateChanged } from "firebase/auth";
-import axios, { AxiosResponse } from "axios";
 import { SkeletonCard } from "./loading";
 import ReactMarkdown from "react-markdown";
-import { cn } from "@/lib/utils";
 import ViewMore from "./viewmore";
-import { LocalServiceCard } from "./LocalServiceCard";
-import { CardCarousel } from "./CardCarousel";
-import { User } from "firebase/auth";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { DefaultChatPage } from "./Deafultchatpage";
 import { ChatPage } from "./chatpage";
 import { ChatInbox } from "./chatInbox";
+import { LocalServiceCard } from "./LocalServiceCard";
 
 interface Location {
   latitude: number | null;
@@ -44,7 +37,7 @@ const Main: React.FC = () => {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [manualLocation, setManualLocation] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [streamedResponse, setStreamedResponse] = useState("");
+  const [streamedResponse, setStreamedResponse] = useState<string>("");
   const [services, setServices] = useState<ServiceItem[]>([]);
 
   const conversationEndRef = useRef<HTMLDivElement>(null);
@@ -150,7 +143,7 @@ const Main: React.FC = () => {
         return;
       }
     }
-
+  
     const newConversation: ConversationItem[] = [
       ...conversation,
       { sender: "user", text: userMessage },
@@ -160,7 +153,7 @@ const Main: React.FC = () => {
     setIsLoading(true);
     setStreamedResponse("");
     setServices([]);
-
+  
     try {
       const response = await fetch("/api/gemini", {
         method: "POST",
@@ -171,30 +164,31 @@ const Main: React.FC = () => {
           longitude: location.longitude,
         }),
       });
-
+  
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+  
       const reader = response.body?.getReader();
       if (!reader) {
         throw new Error("Failed to get response reader");
       }
-
+  
       let aiResponseText = "";
-
+      let receivedServices: ServiceItem[] = [];
+  
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = new TextDecoder().decode(value);
         const messages = chunk.split("\n").filter(Boolean);
-
         for (const message of messages) {
           try {
             const parsedMessage = JSON.parse(message);
             switch (parsedMessage.type) {
               case "services":
-                setServices(parsedMessage.data);
+                receivedServices = parsedMessage.data;
+                setServices(receivedServices);
                 break;
               case "text":
                 aiResponseText += parsedMessage.data;
@@ -208,19 +202,19 @@ const Main: React.FC = () => {
           }
         }
       }
-
+  
       const formattedResponse = <ReactMarkdown>{aiResponseText}</ReactMarkdown>;
-
+  
       let aiResponse: React.ReactNode = (
         <div>
           {formattedResponse}
-          {services && services.length > 0 && (
+          {receivedServices && receivedServices.length > 0 && (
             <div className="mt-4 w-full">
               <article className="flex gap-2">
-                Check this out or <ViewMore data={services.slice(2)} />
+                Check this out or <ViewMore data={receivedServices.slice(2)} />
               </article>
-              <div className="w-full grid grid-rows-2">
-                {services.slice(0, 2).map((service: ServiceItem) => (
+              <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                {receivedServices.slice(0, 2).map((service: ServiceItem) => (
                   <LocalServiceCard
                     key={service.place_id}
                     name={service.name}
@@ -228,9 +222,9 @@ const Main: React.FC = () => {
                     rating={service.rating}
                     user_ratings_total={service.user_ratings_total}
                     place_id={service.place_id}
-                    phone_number={service.phone_number}
-                    website={service.website}
-                    email={service.email}
+                    phone_number={service.phone_number || "Not available"}
+                    website={service.website || "Not available"}
+                    email={service.email || "Not available"}
                   />
                 ))}
               </div>
@@ -238,7 +232,7 @@ const Main: React.FC = () => {
           )}
         </div>
       );
-
+  
       setConversation([...newConversation, { sender: "AI", text: aiResponse }]);
     } catch (error: any) {
       console.error("Error sending message:", error.message);

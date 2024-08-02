@@ -1,20 +1,20 @@
 {
-    "cSpell.words": [
-        "admindb",
-        "autosize",
-        "Bookingaction",
-        "chatpage",
-        "Deafultchatpage",
-        "firstvisitpopup",
-        "geocode",
-        "googlemaps",
-        "Horizonal",
-        "Jsons",
-        "Loca",
-        "Superjson",
-        "vertexai",
-        "viewmore"
-    ],
-    "IDX.aI.enableInlineCompletion": true,
-    "IDX.aI.enableCodebaseIndexing": true
+  "cSpell.words": [
+    "admindb",
+    "autosize",
+    "Bookingaction",
+    "chatpage",
+    "Deafultchatpage",
+    "firstvisitpopup",
+    "geocode",
+    "googlemaps",
+    "Horizonal",
+    "Jsons",
+    "Loca",
+    "Superjson",
+    "vertexai",
+    "viewmore"
+  ],
+  "IDX.aI.enableInlineCompletion": true,
+  "IDX.aI.enableCodebaseIndexing": true
 }

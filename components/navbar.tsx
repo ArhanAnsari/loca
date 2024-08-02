@@ -9,8 +9,8 @@ export default function Navbar() {
   const [user, setUser] = useState(auth.currentUser);
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if(!currentUser){
-        return null
+      if (!currentUser) {
+        return null;
       }
       setUser(currentUser);
     });
@@ -19,20 +19,31 @@ export default function Navbar() {
   }, []);
 
   const redirectToChat = () => {
-    window.location.href ="/chat"
-    console.log("redirect to chat")
-  }
+    window.location.href = "/chat";
+    console.log("redirect to chat");
+  };
   return (
     <div className="flex justify-between items-center p-5">
-      <span className="text-[#caccce] font-medium text-2xl"><Link href="/">LOCA</Link></span>
+      <span className="text-[#caccce] font-medium text-2xl">
+        <Link href="/">LOCA</Link>
+      </span>
       <nav className="flex gap-4 items-center">
-        <Link href={"/faq"} className="font-bold text-white">FAQ</Link>
+        <Link href={"/faq"} className="font-bold text-white">
+          FAQ
+        </Link>
 
-        {!user?(
-              <Button onClick={SignIn} className="bg-blue-400 rounded-full p-6 hover:bg-blue-300">SignIn </Button>
-            ):(
-              <Button  className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 cursor-pointer"><Link href={'/chat'}>Chat</Link></Button>
-            )}
+        {!user ? (
+          <Button
+            onClick={SignIn}
+            className="bg-blue-400 rounded-full p-6 hover:bg-blue-300"
+          >
+            SignIn{" "}
+          </Button>
+        ) : (
+          <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 cursor-pointer">
+            <Link href={"/chat"}>Chat</Link>
+          </Button>
+        )}
       </nav>
     </div>
   );

@@ -2,19 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getLocalServices } from "@/lib/getLocationServices";
 
-
 function extractServiceQuery(input: string): string | null {
   // This is a simple implementation. You might want to use a more sophisticated NLP approach.
-  const keywords = ['near', 'nearby', 'find', 'looking for', 'search for'];
+  const keywords = ["near", "nearby", "find", "looking for", "search for"];
   const lowercaseInput = input.toLowerCase();
-  
+
   for (const keyword of keywords) {
     const index = lowercaseInput.indexOf(keyword);
     if (index !== -1) {
       return input.slice(index);
     }
   }
-  
+
   return null;
 }
 
@@ -30,11 +29,10 @@ export async function POST(req: NextRequest) {
   if (!userMessage || !latitude || !longitude) {
     return NextResponse.json(
       { error: "Missing required fields: userMessage, latitude, or longitude" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
-  
   try {
     console.log("Fetching local services");
     let services;
@@ -56,7 +54,7 @@ export async function POST(req: NextRequest) {
     const contextMessage = `You are to act as a local AI service finder built by devben. User is looking for local services: "${userMessage}". ${
       services.length > 0
         ? `Here are some available services: ${JSON.stringify(
-            services
+            services,
           )}. Please provide a helpful response based on this information, highlighting and bold the best options based on ratings and number of reviews. If "${userMessage}" doesn't sound like they are looking for local service respond casually for example text like "hello what can you do" you knew you had to reply casually`
         : `Unfortunately, we couldn't find any local services matching the query. Please provide a general response about ${userMessage} and suggest how the user might find local services.`
     }`;
@@ -71,7 +69,7 @@ export async function POST(req: NextRequest) {
         vertexResponse: vertexResponseText,
         services,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error: any) {
     console.error("Server Error:", JSON.stringify(error, null, 2), error);

@@ -1,15 +1,23 @@
-"use client"
-import React, { useState, useEffect } from 'react';
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+"use client";
+import React, { useState, useEffect } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const FirstVisitPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const hasVisited = localStorage.getItem('hasVisitedLoca');
+    const hasVisited = localStorage.getItem("hasVisitedLoca");
     if (!hasVisited) {
       setIsOpen(true);
-      localStorage.setItem('hasVisitedLoca', 'true');
+      localStorage.setItem("hasVisitedLoca", "true");
     }
   }, []);
 
@@ -29,7 +37,12 @@ const FirstVisitPopup = () => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogAction onClick={() => setIsOpen(false)} className='text-[#ccc]'>Got it!</AlertDialogAction>
+          <AlertDialogAction
+            onClick={() => setIsOpen(false)}
+            className="text-[#ccc]"
+          >
+            Got it!
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

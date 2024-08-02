@@ -22,14 +22,14 @@ const Sidebar = () => {
       className={cn(
         `bg-[#1e1f20] min-h-[100vh] inline-flex ${
           extend ? "w-60 p-8" : "w-16 p-4 items-center"
-        } flex flex-col justify-between transition-all duration-500 ease-in-out`
+        } flex flex-col justify-between transition-all duration-500 ease-in-out`,
       )}
     >
       <div
         className={cn(
           `flex flex-col gap-10  ${
             extend ? "animate-extend" : "animate-collapse items-center"
-          }`
+          }`,
         )}
       >
         {extend ? (
@@ -48,7 +48,7 @@ const Sidebar = () => {
           className={cn(
             `bg-[#cccccc80]  text-[#fff] rounded-2xl shadow-inner hover:bg-gray-500 ${
               extend ? "w-32" : "w-12"
-            } transition-all duration-500 ease-in-out`
+            } transition-all duration-500 ease-in-out`,
           )}
         >
           <Link href="/chat" className="flex">

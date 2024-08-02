@@ -1,5 +1,3 @@
-
-
 // interface ServiceItem {
 //   name: string;
 //   address: string;
@@ -18,8 +16,6 @@ interface LocalServiceCardProps {
   website?: string;
   email?: string;
 }
-
-
 
 interface ViewMoreProps {
   data: ServiceItem[];
@@ -49,7 +45,7 @@ interface ChatInboxProps {
 interface Location {
   latitude: number | null;
   longitude: number | null;
-};
+}
 
 interface ServiceItem {
   place_id: string;

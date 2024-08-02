@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React from "react";
 import Image from "next/image";
 import { SignOut } from "@/lib/signIn";
@@ -19,8 +19,8 @@ export const Nav = () => {
     return () => unsubscribe();
   });
   return (
-    <div className="sticky top-0 w-full shadow-md">
-      <nav className="flex justify-between  p-4 ">
+    <div className="sticky top-0 w-full shadow-md ">
+      <nav className="flex justify-between  p-4 bg-red-400">
         <span
           className="text-[#caccce] font-medium text-3xl cursor-pointer"
           onClick={() => (window.location.href = "/")}

@@ -22,36 +22,35 @@ export default function HomePage() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if(!currentUser){
-        return null
+      if (!currentUser) {
+        return null;
       }
       setUser(currentUser);
     });
 
     return () => unsubscribe();
   }, []);
-    let defaultName = ""
-    // const Check = !(user?.displayName === null) : defaultName
+  let defaultName = "";
+  // const Check = !(user?.displayName === null) : defaultName
   const image = user?.photoURL || local;
-  const robotText = `Hi ${!(user?.displayName === null ) }, Yes! I found a great one nearby. Check it out and book now.`
-    // Function to simulate user typing
-    useEffect(() => {
-        const timer = setTimeout(() => {
-          if (!showResponse) {
-            setShowResponse(true);
-            setText(false);
-          }
-        }, 9000); // Adjust this delay as needed
-    
-        return () => clearTimeout(timer);
-      }, [showResponse]);
+  const robotText = `Hi ${!(user?.displayName === null)}, Yes! I found a great one nearby. Check it out and book now.`;
+  // Function to simulate user typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!showResponse) {
+        setShowResponse(true);
+        setText(false);
+      }
+    }, 9000); // Adjust this delay as needed
 
+    return () => clearTimeout(timer);
+  }, [showResponse]);
 
   return (
     <section className="bg-[#131314]  w-full flex flex-col justify-center">
       <Navbar />
       <header className="p-5 lg:p-5 lg:p-auto flex flex-col lg:flex-row justify-around items-center  h-[55rem] ">
-      <div className="relative lg:hidden block bg-[#34343677] w-full max-w-[30rem] h-[21rem]">
+        <div className="relative lg:hidden block bg-[#34343677] w-full max-w-[30rem] h-[21rem]">
           <div className=" p-4 rounded-lg">
             <div className="flex gap-2">
               <Image
@@ -61,31 +60,30 @@ export default function HomePage() {
                 height={50}
                 className="flex self-start"
               />
-             
-             <div className="space-y-4">
-            {!showResponse && text && (
-              <div className="mt-32 ml-10">
-                <h1 className="animate-pulse bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-red-600 text-6xl">
-                  Loca AI
-                </h1>
+
+              <div className="space-y-4">
+                {!showResponse && text && (
+                  <div className="mt-32 ml-10">
+                    <h1 className="animate-pulse bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-red-600 text-6xl">
+                      Loca AI
+                    </h1>
+                  </div>
+                )}
+                {showResponse && (
+                  <div className="text-[#caccce]">
+                    <Typewriter
+                      onInit={(t) => {
+                        t.typeString(robotText)
+                          .callFunction(() => {
+                            setShowCard(true);
+                          })
+                          .start();
+                      }}
+                    />
+                  </div>
+                )}
+                {showCard && <CardComponent />}
               </div>
-            )}
-            {showResponse && (
-              <div className="text-[#caccce]">
-                <Typewriter
-                  onInit={(t) => {
-                    t.typeString(robotText)
-                      .callFunction(() => {
-                        setShowCard(true);
-                      })
-                      .start();
-                  }}
-                />
-              </div>
-            )}
-            {showCard && <CardComponent />}
-          </div>
-              
             </div>
           </div>
           <div className="flex gap-2 p-6 items-center absolute -bottom-14 right-0 bg-[#131314] rounded-lg">
@@ -100,7 +98,7 @@ export default function HomePage() {
               <Typewriter
                 onInit={(t) => {
                   t.typeString(
-                    `<p className="text-[#caccce] font-semibold"> Hey <b>Loca</b>, any plumber near <br /> me in Texas</p>`
+                    `<p className="text-[#caccce] font-semibold"> Hey <b>Loca</b>, any plumber near <br /> me in Texas</p>`,
                   )
                     // .pauseFor(2500)
                     .callFunction(() => {
@@ -124,13 +122,20 @@ export default function HomePage() {
             Chat to start finding local service providers like plumber,
             Furniture etc.{" "}
           </p>
-          
-            {!user?(
-              <Button onClick={SignIn} className="bg-blue-400 rounded-full p-6 hover:bg-blue-300">SignIn </Button>
-            ):(
-              <Button  className="bg-blue-400 rounded-full p-6 hover:bg-blue-300"> <Link href="/chat">Chat</Link>   </Button>
-            )}
-       
+
+          {!user ? (
+            <Button
+              onClick={SignIn}
+              className="bg-blue-400 rounded-full p-6 hover:bg-blue-300"
+            >
+              SignIn{" "}
+            </Button>
+          ) : (
+            <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300">
+              {" "}
+              <Link href="/chat">Chat</Link>{" "}
+            </Button>
+          )}
         </div>
         <div className="relative lg:block hidden bg-[#34343677] w-full max-w-[30rem] h-80">
           <div className=" p-4 rounded-lg">
@@ -142,33 +147,32 @@ export default function HomePage() {
                 height={50}
                 className="flex self-start"
               />
-             
-             <div className="space-y-4">
-            {!showResponse && text && (
-              <div className="mt-32 ml-20">
-                <h1 className="animate-pulse bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-red-600 text-6xl">
-                  Loca AI
-                </h1>
+
+              <div className="space-y-4">
+                {!showResponse && text && (
+                  <div className="mt-32 ml-20">
+                    <h1 className="animate-pulse bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-red-600 text-6xl">
+                      Loca AI
+                    </h1>
+                  </div>
+                )}
+                {showResponse && (
+                  <div className="text-[#caccce]">
+                    <Typewriter
+                      onInit={(t) => {
+                        t.typeString(
+                          "Yes! I found a great one nearby. Check it out and book now.",
+                        )
+                          .callFunction(() => {
+                            setShowCard(true);
+                          })
+                          .start();
+                      }}
+                    />
+                  </div>
+                )}
+                {showCard && <CardComponent />}
               </div>
-            )}
-            {showResponse && (
-              <div className="text-[#caccce]">
-                <Typewriter
-                  onInit={(t) => {
-                    t.typeString(
-                      'Yes! I found a great one nearby. Check it out and book now.'
-                    )
-                      .callFunction(() => {
-                        setShowCard(true);
-                      })
-                      .start();
-                  }}
-                />
-              </div>
-            )}
-            {showCard && <CardComponent />}
-          </div>
-              
             </div>
           </div>
           <div className="flex gap-2 p-6 items-center absolute -bottom-14 right-0 bg-[#131314] rounded-lg">
@@ -183,7 +187,7 @@ export default function HomePage() {
               <Typewriter
                 onInit={(t) => {
                   t.typeString(
-                    `<p className="text-[#caccce] font-semibold"> Hey <b>Loca</b>, any plumber near <br /> me in Texas</p>`
+                    `<p className="text-[#caccce] font-semibold"> Hey <b>Loca</b>, any plumber near <br /> me in Texas</p>`,
                   )
                     // .pauseFor(2500)
                     .callFunction(() => {
