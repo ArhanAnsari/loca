@@ -14,7 +14,7 @@ const ViewMore: React.FC<ViewMoreProps> = ({ data }) => {
   return (
     <main>
       <Sheet>
-        <SheetTrigger>View More</SheetTrigger>
+        <SheetTrigger className="underline text-blue-600">View More</SheetTrigger>
         <SheetContent className="bg-[#1e1f20] text-white border-none overflow-auto">
           <SheetHeader className="mt-5">
             <SheetTitle className="text-white text-md">

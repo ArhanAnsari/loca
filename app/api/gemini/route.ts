@@ -73,10 +73,11 @@ export async function POST(req: NextRequest) {
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
         // Modify the prompt to include the user's name
-        const prompt = `You are Loca, a local AI service finder. You're talking to ${userName}. This is a FAQ about you: ${faqs}. Use this to improve your response. ${
+        const prompt = `You are Loca, a local AI service finder. You're talking to ${userName}.Here is some important information about you (Loca) in the form of FAQs:
+       ${JSON.stringify(faqs)} ${
           services.length > 0
             ? `Here are some available services: ${JSON.stringify(services)}. Provide a helpful response based on this information, highlighting the best options for ${userName}.`
-            : `Provide a general response about "${userMessage}" for ${userName}. If they are asking about local services, suggest how they might find them.`
+            : `Provide a general response about "${userMessage}" for ${userName}. If they are asking about local services, suggest how they might find them using your ${faqs} aor just let them know to turn on their location, tell them to give you access to thier location cause you will need that to get them services near them.`
         }`;
 
         // Generate content stream from the AI model based on the prompt

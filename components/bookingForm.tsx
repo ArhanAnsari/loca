@@ -53,7 +53,7 @@ export function BookingForm() {
           ...formData,
           createdAt: new Date(),
         });
-        alert("Submitted successfully");
+        alert("Submitted successfully, hold on while we process your booking");
         console.log("Document written with ID: ", docRef.id);
         router.push("/chat");
         setIsOpen(false);

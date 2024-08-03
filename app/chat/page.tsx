@@ -76,7 +76,7 @@ export default function Chat() {
       </div>
       <div className=" bg-[#1212] min-h-[100vh] pb-[15vh] relative flex-1 ">
         <div className="flex flex-col max-h-[830px] overflow-y-auto scroll-m-1">
-          <div className="sticky z-10 top-0 w-full shadow-lg">
+          <div className="sticky bg-fixed z-10 top-0 w-full shadow-2xl bg-black">
             <nav className="flex justify-between  p-4 ">
               <span
                 className="text-[#caccce] font-medium text-3xl cursor-pointer"

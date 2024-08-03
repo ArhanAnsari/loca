@@ -139,7 +139,7 @@ export function Booking({
                   loading="eager"
                   onError={handleMapError}
                   title={`Map of ${locationName || "service location"}`}
-                  // referrerpolicy="no-referrer-when-downgrade"
+                // referrerpolicy="no-referrer-when-downgrade"
                 ></iframe>
               ) : (
                 <div className="bg-gray-100 p-4 text-center">
@@ -190,13 +190,15 @@ export function Booking({
               <Link href="/chat/booking">Book by Loca</Link>
             </Button> */}
             <BookingForm />
-            <span className="text-xs underline text-center">
+            <BookingForm />
+            <Link
+              href="/faqs"
+              className="text-xs underline text-center cursor-pointer"
+            >
               ReadMore on How we use Loca to Book you a service provider
-            </span>
-            {/* <span className="text-xs text-center">
-              Booking by loca is still in development and will be available
-              soon..
-            </span> */}
+            </Link>
+
+
           </div>
           <DialogFooter className="sm:justify-start">
             <DialogClose asChild>
@@ -282,7 +284,7 @@ export function Booking({
                 loading="eager"
                 onError={handleMapError}
                 title={`Map of ${locationName || "service location"}`}
-                // referrerpolicy="no-referrer-when-downgrade"
+              // referrerpolicy="no-referrer-when-downgrade"
               ></iframe>
             ) : (
               <div className="bg-gray-100 p-4 text-center">
