@@ -1,4 +1,5 @@
 import { SendHorizontalIcon } from "lucide-react";
+import { motion } from 'framer-motion';
 
 export const ChatInbox: React.FC<ChatInboxProps> = ({
   textareaRef,
@@ -9,41 +10,54 @@ export const ChatInbox: React.FC<ChatInboxProps> = ({
   locationError,
 }) => {
   return (
-       <main className="relative mt-2  bg-red-400 "> {/* Adjust positioning */}
-      <div className="px-3 w-full max-w-5xl mx-auto fixed bottom-0 left-0 right-0 bg-black "> 
-        {locationError && (
-          <div className="mb-2">
-            <p className="text-red-500 mb-1">{locationError}</p>
-          </div>
-        )}
-        <div className="relative  flex items-center gap-2 w-full rounded-md bg-[#1e1f20] p-3">
-          <textarea
-            ref={textareaRef}
-            value={userMessage}
-            onChange={handleInput}
-            onKeyPress={(e) =>
-              e.key === "Enter" && !isProcessing && handleSendMessage()
-            }
-            className="flex-1 rounded-full bg-[#1e1f20] text-[#ccc] p-2 px-4 outline-none cursor-text text-md resize-none overflow-auto max-h-[6rem]"
-            placeholder={`Looking for local service provider? ${
-              isProcessing ? "processing...." : ""
-            }`}
-            disabled={isProcessing}
-            rows={1}
-            style={{ maxHeight: "6rem" }} // Adjust this value as needed
-          />
-          <SendHorizontalIcon
-            className={`text-[#ccc] cursor-pointer ${
-              isProcessing ? "opacity-50" : ""
-            }`}
-            onClick={() => !isProcessing && handleSendMessage()}
-          />
-        </div>
-        <p className="text-[#ccc] text-xs text-center mt-2">
-          <b>LOCA</b> uses your input to fetch services. Keep your input brief
-          for more accurate results.
-        </p>
+    <motion.div
+      className="border-t border-gray-700  p-4"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      {locationError && (
+        <motion.div
+          className="mb-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <p className="text-red-500 text-sm">{locationError}</p>
+        </motion.div>
+      )}
+      <div className="flex items-center gap-2">
+        <motion.textarea
+          ref={textareaRef}
+          value={userMessage}
+          onChange={handleInput}
+          onKeyPress={(e) => e.key === "Enter" && !isProcessing && handleSendMessage()}
+          className="flex-1 bg-gray-800 text-white rounded-full px-4 py-2 outline-none resize-none"
+          placeholder={isProcessing ? "Processing..." : "Looking for local service provider?"}
+          disabled={isProcessing}
+          rows={1}
+          style={{ maxHeight: "6rem" }}
+          whileFocus={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        />
+        <motion.button
+          className={`text-white p-2 rounded-full ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}`}
+          onClick={() => !isProcessing && handleSendMessage()}
+          disabled={isProcessing}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <SendHorizontalIcon className="w-5 h-5" />
+        </motion.button>
       </div>
-    </main>
+      <motion.p
+        className="text-gray-400 text-xs text-center mt-2"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+      >
+        <b>LOCA</b> uses your input to fetch services. Keep your input brief for more accurate results.
+      </motion.p>
+    </motion.div>
   );
-};
+}

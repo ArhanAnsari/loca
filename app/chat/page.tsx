@@ -1,27 +1,30 @@
 "use client";
 import Main from "@/components/main";
 import Sidebar from "@/components/sidebar";
-import { onAuthStateChanged } from "firebase/auth";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { auth } from "@/lib/firebase";
 import local from "@/public/png/logo-black.png";
 import Image from "next/image";
 import FirstVisitPopup from "@/components/firstvisitpopup";
 import { SignOut } from "@/lib/signIn";
-import { LogOut } from "lucide-react";
+import { LogOut, MenuIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface UserData {
   name?: string;
   email?: string;
   photoURL?: string;
 }
+
 export default function Chat() {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const router = useRouter();
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const verifySession = async () => {
@@ -53,6 +56,18 @@ export default function Chat() {
 
     verifySession();
   }, [router]);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -64,50 +79,57 @@ export default function Chat() {
   }
 
   if (!user) {
-    return router.push("/"); 
+    router.push("/");
+    return null;
   }
-  // @ts-ignore
-  const image = user?.photoURL as string;
-  return (
-    <main className=" flex  bg-black h-[100vh] ">
-      <FirstVisitPopup />
-      <div className=" hidden lg:block">
-        <Sidebar />
-      </div>
-      <div className=" bg-[#1212] min-h-[100vh] pb-[15vh] relative flex-1 ">
-        <div className="flex flex-col max-h-[830px] overflow-y-auto scroll-m-1">
-          <div className="sticky  z-10 top-0 w-full shadow-2xl bg-black">
-            <nav className="flex justify-between  p-4 ">
-              <span
-                className="text-[#caccce] font-medium text-3xl cursor-pointer"
-                onClick={() => (window.location.href = "/")}
-              >
-                Loca
-              </span>
-              <div className="flex gap-6 items-center">
-                <div
-                  className="flex gap-1 cursor-pointer  text-[#ccc] lg:hidden"
-                  onClick={SignOut}
-                >
-                  <LogOut />
-                  <span className="animate-fadeIn xs:hidden">LogOut</span>
-                </div>
-                <Image
-                  src={image}
-                  alt="user"
-                  className="rounded-full"
-                  width={50}
-                  height={50}
-                />
-              </div>
-            </nav>
-          </div>
 
-          <div className="h-screen px-5 ">
-            <Main />
-          </div>
+  const image = user?.photoURL as string;
+
+  return (
+    <main className="flex h-screen bg-black overflow-hidden">
+    <FirstVisitPopup />
+    <div className="hidden lg:block">
+      <Sidebar />
+    </div>
+    <div className="flex-1 flex flex-col">
+      <nav className="flex justify-between p-4  sticky top-0 z-10">
+        <button className="lg:hidden text-white" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+          <MenuIcon />
+        </button>
+        <span className="text-[#caccce] font-medium text-3xl cursor-pointer" onClick={() => window.location.href = "/"}>
+          Loca
+        </span>
+        <div className="flex gap-6 items-center">
+          <button className="lg:hidden text-[#ccc]" onClick={SignOut}>
+            <LogOut />
+          </button>
+          <Image src={image} alt="user" className="rounded-full" width={50} height={50} />
         </div>
+      </nav>
+      <div className="flex-1 overflow-hidden">
+        <Main />
       </div>
+    </div>
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            ref={sidebarRef}
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed inset-y-0 left-0 w-64 bg-gray-900 z-50 lg:hidden"
+          >
+            <button
+              className="absolute top-4 right-4 text-white"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <X size={24} />
+            </button>
+            <Sidebar onClose={() => setIsSidebarOpen(false)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

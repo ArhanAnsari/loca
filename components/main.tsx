@@ -220,39 +220,36 @@ const Main: React.FC = () => {
     setUserMessage(e.target.value);
   };
   return (
-    <div className="w-full block m-auto max-w-5xl h-full pb-32 lg:pb-2"> {/* Add pb-32 for bottom padding */}
-    <div className="overflow-y-auto max-h-[calc(100vh-8rem)]">
+    <div className="flex flex-col h-full w-full max-w-4xl m-auto">
+      <div className="flex-1 overflow-y-auto px-4 py-6">
         {conversation.length === 0 ? (
           <DefaultChatPage user={user?.displayName?.slice(0, 3) || "Dev"} />
         ) : (
-        
-               conversation.map((message, index) => (
-                <div key={index}> 
-                <ChatPage
-                  message={message}
-                  index={index}
-                  image={image}
-                  logo={Logo}
-                  isLoading={isLoading}
-                  conversationEndRef={conversationEndRef}
-                />
-                <div ref={conversationEndRef} />
-              </div>
+          conversation.map((message, index) => (
+            <ChatPage
+              key={index}
+              message={message}
+              index={index}
+              image={image}
+              logo={Logo}
+              isLoading={isLoading}
+              conversationEndRef={conversationEndRef}
+            />
           ))
-        
-     
         )}
         {isLoading && <SkeletonCard />}
-   
+        <div ref={conversationEndRef} />
       </div>
-      <ChatInbox
-        locationError={locationError}
-        isProcessing={isProcessing}
-        handleInput={handleInput}
-        textareaRef={textareaRef}
-        userMessage={userMessage}
-        handleSendMessage={handleSendMessage}
-      />
+      <div className="sticky bottom-0 ">
+        <ChatInbox
+          locationError={locationError}
+          isProcessing={isProcessing}
+          handleInput={handleInput}
+          textareaRef={textareaRef}
+          userMessage={userMessage}
+          handleSendMessage={handleSendMessage}
+        />
+      </div>
     </div>
   );
 };

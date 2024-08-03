@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import Image from "next/image";
+import { motion } from 'framer-motion';
 export const ChatPage: React.FC<ChatPageProps> = ({
   message,
   index,
@@ -10,31 +11,40 @@ export const ChatPage: React.FC<ChatPageProps> = ({
 
   conversationEndRef,
 }) => {
+  const isUser = message.sender === "user";
+  const bubbleVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
-    <ScrollArea className="">
-      <main className="">
-        <div
-          key={index}
-          className="flex flex-col lg:flex-row lg:items-center gap-4  mb-8"
-        >
-          <Image
-            src={message.sender === "user" ? image : logo}
-            alt={message.sender === "user" ? "user" : "Loca AI image"}
-            width={50}
-            height={50}
-            className={cn(
-              message.sender === "user" ? "" : "",
-              "self-start rounded-full",
-            )}
-          />
-          <p className="text-white " onCopy={(e) => !!e}>
-            {message.text}
-          </p>
-          <div ref={conversationEndRef} />
-        </div>
-        {/* 
-          {isLoading && <SkeletonCard />} */}
-      </main>
-    </ScrollArea>
+    <motion.div
+    className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
+    initial="hidden"
+    animate="visible"
+    variants={bubbleVariants}
+    transition={{ duration: 0.3, delay: index * 0.1 }}
+  >
+    <div className={`flex ${isUser ? 'flex-row-reverse' : 'flex-row'} items-end max-w-[90%]`}>
+      <Image
+        src={isUser ? image : logo}
+        alt={isUser ? "user" : "Loca AI image"}
+        width={40}
+        height={40}
+        className="rounded-full"
+      />
+      <motion.div 
+        className={`px-4 py-2 rounded-2xl ${
+          isUser 
+            ? 'bg-blue-700 text-white mr-2' 
+            : 'bg-gray-600 text-black ml-2'
+        }`}
+        whileHover={{ scale: 1.03 }}
+        // whileTap={{ scale: 0.95 }}
+      >
+        {message.text}
+      </motion.div>
+    </div>
+  </motion.div>
   );
 };

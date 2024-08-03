@@ -14,35 +14,42 @@ import { cn } from "@/lib/utils";
 import { SignOut } from "@/lib/signIn";
 import Link from "next/link";
 
-const Sidebar = () => {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const [extend, setExtend] = useState(false);
 
   return (
     <aside
+    className={cn(
+      `bg-gray-900 h-full inline-flex ${
+        extend ? "w-60 p-8" : "w-16 p-4 items-center"
+      } flex flex-col justify-between transition-all duration-500 ease-in-out`,
+    )}
+  >
+    <div
       className={cn(
-        `bg-[#1e1f20] min-h-[100vh] inline-flex ${
-          extend ? "w-60 p-8" : "w-16 p-4 items-center"
-        } flex flex-col justify-between transition-all duration-500 ease-in-out`,
+        `flex flex-col gap-10  ${
+          extend ? "animate-extend" : "animate-collapse items-center"
+        }`,
       )}
     >
-      <div
-        className={cn(
-          `flex flex-col gap-10  ${
-            extend ? "animate-extend" : "animate-collapse items-center"
-          }`,
-        )}
-      >
-        {extend ? (
-          <SidebarCloseIcon
-            onClick={() => setExtend((e) => !e)}
-            className="text-[#ccc] cursor-pointer font-extrabold"
-          />
-        ) : (
-          <MenuIcon
-            className="text-[#ccc] cursor-pointer font-extrabold"
-            onClick={() => setExtend((e) => !e)}
-          />
-        )}
+      {extend ? (
+        <SidebarCloseIcon
+          onClick={() => {
+            setExtend(false);
+            onClose && onClose();
+          }}
+          className="text-[#ccc] cursor-pointer font-extrabold"
+        />
+      ) : (
+        <MenuIcon
+          className="text-[#ccc] cursor-pointer font-extrabold"
+          onClick={() => setExtend(true)}
+        />
+      )}
 
         <Button
           className={cn(
@@ -82,7 +89,7 @@ const Sidebar = () => {
         </div>
       </div>
       <div>
-        <ul className="flex flex-col gap-4 text-[#ccc] ">
+      <ul className="flex flex-col gap-4 text-[#ccc] ">
           <li>
             <Link href="/faq" className="flex gap-2 items-center">
               <MailQuestion />{" "}
@@ -90,7 +97,13 @@ const Sidebar = () => {
             </Link>
           </li>
 
-          <li className="flex gap-2 cursor-pointer" onClick={SignOut}>
+          <li 
+            className="flex gap-2 cursor-pointer" 
+            onClick={() => {
+              SignOut();
+              onClose && onClose();
+            }}
+          >
             <LogOut />{" "}
             {extend ? <span className="animate-fadeIn">LogOut</span> : null}
           </li>
