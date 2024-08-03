@@ -56,6 +56,7 @@ export default function Chat() {
 
     verifySession();
   }, [router]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
@@ -87,29 +88,29 @@ export default function Chat() {
 
   return (
     <main className="flex h-screen bg-black overflow-hidden">
-    <FirstVisitPopup />
-    <div className="hidden lg:block">
-      <Sidebar />
-    </div>
-    <div className="flex-1 flex flex-col">
-      <nav className="flex justify-between p-4  sticky top-0 z-10">
-        <button className="lg:hidden text-white" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-          <MenuIcon />
-        </button>
-        <span className="text-[#caccce] font-medium text-3xl cursor-pointer" onClick={() => window.location.href = "/"}>
-          Loca
-        </span>
-        <div className="flex gap-6 items-center">
-          <button className="lg:hidden text-[#ccc]" onClick={SignOut}>
-            <LogOut />
-          </button>
-          <Image src={image} alt="user" className="rounded-full" width={50} height={50} />
-        </div>
-      </nav>
-      <div className="flex-1 overflow-hidden">
-        <Main />
+      <FirstVisitPopup />
+      <div className="hidden lg:block">
+        <Sidebar />
       </div>
-    </div>
+      <div className="flex-1 flex flex-col">
+        <nav className="flex justify-between  items-center p-4 sticky top-0 z-10">
+          <button className="lg:hidden text-white" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+            <MenuIcon />
+          </button>
+          <span className="text-[#caccce] font-medium text-3xl cursor-pointer items-center" onClick={() => window.location.href = "/"}>
+            Loca
+          </span>
+          <div className="flex gap-6 items-center">
+            <button className="lg:hidden text-[#ccc]" onClick={SignOut}>
+              <LogOut />
+            </button>
+            <Image src={image} alt="user" className="rounded-full" width={50} height={50} />
+          </div>
+        </nav>
+        <div className="flex-1 overflow-hidden">
+          <Main />
+        </div>
+      </div>
       <AnimatePresence>
         {isSidebarOpen && (
           <motion.div

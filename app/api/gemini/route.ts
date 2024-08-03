@@ -12,22 +12,29 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 export async function POST(req: NextRequest) {
   try {
     // Get the authorization token from the request headers
-     // Get the session cookie from the request
-     const sessionCookie = req.cookies.get('session')?.value;
+    // Get the session cookie from the request
+    const sessionCookie = req.cookies.get("session")?.value;
 
-     if (!sessionCookie) {
-       return NextResponse.json({ error: "No session cookie found" }, { status: 401 });
-     }
- 
-     // Verify the session cookie
-     const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
- 
-     // Fetch user data from Firestore
-     const userDoc = await admindb.collection("users").doc(decodedClaims.uid).get();
-     const userData = userDoc.data();
-     const userName = userData?.name || "User";
+    if (!sessionCookie) {
+      return NextResponse.json(
+        { error: "No session cookie found" },
+        { status: 401 },
+      );
+    }
 
-  
+    // Verify the session cookie
+    const decodedClaims = await adminAuth.verifySessionCookie(
+      sessionCookie,
+      true,
+    );
+
+    // Fetch user data from Firestore
+    const userDoc = await admindb
+      .collection("users")
+      .doc(decodedClaims.uid)
+      .get();
+    const userData = userDoc.data();
+    const userName = userData?.name || "User";
 
     // Parse the request body to get userMessage, latitude, and longitude
     const { userMessage, latitude, longitude } = await req.json();
@@ -75,10 +82,10 @@ export async function POST(req: NextRequest) {
         // Modify the prompt to include the user's name
         const prompt = `You are Loca, a local AI service finder. You're talking to ${userName}.Here is some important information about you (Loca) in the form of FAQs:
        ${JSON.stringify(faqs)} ${
-          services.length > 0
-            ? `Here are some available services: ${JSON.stringify(services)}. Provide a helpful response based on this information, highlighting the best options for ${userName}.`
-            : `Provide a general response about "${userMessage}" for ${userName}. If they are asking about local services, suggest how they might find them using your ${faqs} aor just let them know to turn on their location, tell them to give you access to thier location cause you will need that to get them services near them.`
-        }`;
+         services.length > 0
+           ? `Here are some available services: ${JSON.stringify(services)}. Provide a helpful response based on this information, highlighting the best options for ${userName}.`
+           : `Provide a general response about "${userMessage}" for ${userName}. If they are asking about local services, suggest how they might find them using your ${faqs} aor just let them know to turn on their location, tell them to give you access to thier location cause you will need that to get them services near them.`
+       }`;
 
         // Generate content stream from the AI model based on the prompt
         const result = await model.generateContentStream(prompt);

@@ -37,14 +37,28 @@ const Main: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [streamedResponse, setStreamedResponse] = useState<string>("");
   const [services, setServices] = useState<ServiceItem[]>([]);
+  const [conversations, setConversations] = useState<{ id: string; title: string }[]>([])
 
   const conversationEndRef = useRef<HTMLDivElement>(null);
 
-  const getLocationMap = location;
 
   const scrollToBottom = () => {
     conversationEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+  useEffect(() => {
+    const savedConversations = localStorage.getItem('conversations');
+    if (savedConversations) {
+      setConversations(JSON.parse(savedConversations));
+    }
+  }, []);
+  
+  const saveConversation = (title: string) => {
+    const newConversation = { id: Date.now().toString(), title };
+    const updatedConversations = [...conversations, newConversation];
+    setConversations(updatedConversations);
+    localStorage.setItem('conversations', JSON.stringify(updatedConversations));
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [conversation]);
@@ -87,6 +101,7 @@ const Main: React.FC = () => {
 
   const handleSendMessage = async () => {
     if (!userMessage.trim() || isProcessing) return;
+    
     if (userMessage.length > 500) {
       setLocationError(
         "Input is too long. Please keep your message under 500 characters.",
@@ -167,7 +182,7 @@ const Main: React.FC = () => {
           {formattedResponse}
           {receivedServices && receivedServices.length > 0 && (
             <div className="mt-4 w-full">
-              <article className="flex gap-2">
+              <article className="flex gap-2 mb-2">
                 Check this out or <ViewMore data={receivedServices.slice(2)} />
               </article>
               <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">

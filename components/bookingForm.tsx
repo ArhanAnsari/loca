@@ -18,10 +18,12 @@ export function BookingForm() {
     message: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setErrors(prev => ({ ...prev, [name]: "" }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const validate = () => {
@@ -78,11 +80,18 @@ export function BookingForm() {
           <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-white text-xl font-bold">Booking Form</h2>
-              <button onClick={() => setIsOpen(false)} className="text-white">&times;</button>
+              <button onClick={() => setIsOpen(false)} className="text-white">
+                &times;
+              </button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="name" className="block text-white text-sm font-bold mb-2">Your name</label>
+                <label
+                  htmlFor="name"
+                  className="block text-white text-sm font-bold mb-2"
+                >
+                  Your name
+                </label>
                 <input
                   type="text"
                   id="name"
@@ -92,10 +101,17 @@ export function BookingForm() {
                   className="w-full px-3 py-2 text-white bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                   placeholder="Your name"
                 />
-                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                {errors.name && (
+                  <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                )}
               </div>
               <div>
-                <label htmlFor="email" className="block text-white text-sm font-bold mb-2">Email</label>
+                <label
+                  htmlFor="email"
+                  className="block text-white text-sm font-bold mb-2"
+                >
+                  Email
+                </label>
                 <input
                   type="email"
                   id="email"
@@ -105,10 +121,17 @@ export function BookingForm() {
                   className="w-full px-3 py-2 text-white bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                   placeholder="Email"
                 />
-                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                )}
               </div>
               <div>
-                <label htmlFor="message" className="block text-white text-sm font-bold mb-2">Description</label>
+                <label
+                  htmlFor="message"
+                  className="block text-white text-sm font-bold mb-2"
+                >
+                  Description
+                </label>
                 <textarea
                   id="message"
                   name="message"
@@ -118,7 +141,9 @@ export function BookingForm() {
                   placeholder="Describe your services here"
                   rows={4}
                 />
-                {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
+                {errors.message && (
+                  <p className="text-red-500 text-xs mt-1">{errors.message}</p>
+                )}
               </div>
               <button
                 type="submit"

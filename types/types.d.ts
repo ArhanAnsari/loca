@@ -65,3 +65,8 @@ interface CustomInputProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   error?: string;
 }
+
+interface ConversationItem {
+  sender: "user" | "AI";
+  text: string | React.ReactNode;
+}

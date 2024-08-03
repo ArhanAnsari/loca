@@ -1,5 +1,4 @@
 import { SendHorizontalIcon } from "lucide-react";
-import { motion } from 'framer-motion';
 
 export const ChatInbox: React.FC<ChatInboxProps> = ({
   textareaRef,
@@ -10,24 +9,14 @@ export const ChatInbox: React.FC<ChatInboxProps> = ({
   locationError,
 }) => {
   return (
-    <motion.div
-      className="border-t border-gray-700  p-4"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
+    <div className="border-t border-gray-700 w-full max-w-5xl p-4">
       {locationError && (
-        <motion.div
-          className="mb-2"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
+        <div className="mb-2">
           <p className="text-red-500 text-sm">{locationError}</p>
-        </motion.div>
+        </div>
       )}
       <div className="flex items-center gap-2">
-        <motion.textarea
+        <textarea
           ref={textareaRef}
           value={userMessage}
           onChange={handleInput}
@@ -37,27 +26,18 @@ export const ChatInbox: React.FC<ChatInboxProps> = ({
           disabled={isProcessing}
           rows={1}
           style={{ maxHeight: "6rem" }}
-          whileFocus={{ scale: 1.02 }}
-          transition={{ duration: 0.2 }}
         />
-        <motion.button
+        <button
           className={`text-white p-2 rounded-full ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}`}
           onClick={() => !isProcessing && handleSendMessage()}
           disabled={isProcessing}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
         >
           <SendHorizontalIcon className="w-5 h-5" />
-        </motion.button>
+        </button>
       </div>
-      <motion.p
-        className="text-gray-400 text-xs text-center mt-2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-      >
+      <p className="text-gray-400 text-xs text-center mt-2">
         <b>LOCA</b> uses your input to fetch services. Keep your input brief for more accurate results.
-      </motion.p>
-    </motion.div>
+      </p>
+    </div>
   );
-}
+};
