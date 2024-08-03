@@ -190,7 +190,6 @@ export function Booking({
               <Link href="/chat/booking">Book by Loca</Link>
             </Button> */}
             <BookingForm />
-            <BookingForm />
             <Link
               href="/faqs"
               className="text-xs underline text-center cursor-pointer"
