@@ -34,7 +34,6 @@ const Main: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [manualLocation, setManualLocation] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [streamedResponse, setStreamedResponse] = useState<string>("");
   const [services, setServices] = useState<ServiceItem[]>([]);
@@ -57,8 +56,8 @@ const Main: React.FC = () => {
         navigator.geolocation.getCurrentPosition(
           (position: GeolocationPosition) => {
             setLocation({
-              latitude: position.coords.latitude || null,
-              longitude: position.coords.longitude || null,
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
             });
             setLocationError(null);
           },
@@ -72,7 +71,7 @@ const Main: React.FC = () => {
         );
       } else {
         setLocationError(
-          "Geolocation is not supported by this browser. Please enter your location manually",
+          "Geolocation is not supported by this browser. Please try using a different browser."
         );
       }
     };
@@ -86,45 +85,6 @@ const Main: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  // handler for manual location if error occur on automatic location
-  const handleManualLocationSubmit = async () => {
-    if (!manualLocation.trim()) {
-      setLocationError("Please enter a location.");
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-          manualLocation,
-        )}&key=${process.env.GOOGLE_PLACES_API_KEY}`,
-      );
-      const data = await response.json();
-
-      if (data.results && data.results.length > 0) {
-        const { lat, lng } = data.results[0].geometry.location;
-        setLocation({ latitude: lat, longitude: lng });
-        setLocationError(null);
-      } else {
-        setLocationError(
-          "Unable to find the location. Please try a more specific address.",
-        );
-      }
-    } catch (error) {
-      console.error("Error geocoding manual location:", error);
-      setLocationError(
-        "Error processing location. Please try again or use a different address.",
-      );
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // if(locationError){
-  //   alert(locationError)
-  // }
-  // handler for sending message to the sever
   const handleSendMessage = async () => {
     if (!userMessage.trim() || isProcessing) return;
     if (userMessage.length > 500) {
@@ -135,12 +95,9 @@ const Main: React.FC = () => {
     }
     setIsProcessing(true);
     if (!location.latitude || !location.longitude) {
-      const locationSubmitted = await handleManualLocationSubmit();
-      // @ts-ignore
-      if (!locationSubmitted) {
-        setIsProcessing(false);
-        return;
-      }
+      setLocationError("Unable to get your location. Please try again.");
+      setIsProcessing(false);
+      return;
     }
 
     const newConversation: ConversationItem[] = [
@@ -262,28 +219,33 @@ const Main: React.FC = () => {
   const handleInput = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setUserMessage(e.target.value);
   };
-return (
-  <div className=" w-full block m-auto max-w-5xl h-full">
-    <div className="">
-      {conversation.length === 0 ? (
-        <DefaultChatPage user={user?.displayName?.slice(0, 3) || "Dev"} />
-      ) : (
-        conversation.map((message, index) => (
-          <ChatPage
-            key={index}
-            message={message}
-            index={index}
-            image={image}
-            logo={Logo}
-            isLoading={isLoading}
-            conversationEndRef={conversationEndRef}
-          />
-        ))
-      )}
-      {isLoading && <SkeletonCard />}
-      <div ref={conversationEndRef} />
-    </div>
-    {/* <div className="sticky bottom-0  bg-green-500 p-4"> */}
+  return (
+    <div className="w-full block m-auto max-w-5xl h-full pb-32 lg:pb-2"> {/* Add pb-32 for bottom padding */}
+    <div className="overflow-y-auto max-h-[calc(100vh-8rem)]">
+        {conversation.length === 0 ? (
+          <DefaultChatPage user={user?.displayName?.slice(0, 3) || "Dev"} />
+        ) : (
+        
+               conversation.map((message, index) => (
+                <div >
+            <ChatPage
+              key={index}
+              message={message}
+              index={index}
+              image={image}
+              logo={Logo}
+              isLoading={isLoading}
+              conversationEndRef={conversationEndRef}
+            />
+                 <div ref={conversationEndRef} />
+              </div>
+          ))
+        
+     
+        )}
+        {isLoading && <SkeletonCard />}
+   
+      </div>
       <ChatInbox
         locationError={locationError}
         isProcessing={isProcessing}
@@ -291,12 +253,9 @@ return (
         textareaRef={textareaRef}
         userMessage={userMessage}
         handleSendMessage={handleSendMessage}
-        setManualLocation={setManualLocation}
-        manualLocation={manualLocation}
       />
-    {/* </div> */}
-  </div>
-);
+    </div>
+  );
 };
 
 export default Main;

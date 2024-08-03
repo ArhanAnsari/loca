@@ -30,7 +30,7 @@ const FirstVisitPopup = () => {
             Loca is an AI-powered local services finder. Please note:
             <ul className="list-disc pl-5 mt-2">
               <li>Loca can only find services based on your specific input.</li>
-              <li>General greetings like &quot;Hi&quot; are not supported.</li>
+              <li>General conversation are not supported.</li>
               <li>Casual chatting is not supported.</li>
               <li>Focus on asking about local services you need.</li>
             </ul>

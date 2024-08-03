@@ -12,6 +12,7 @@ import { SignIn } from "@/lib/signIn";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
+import { Loader2 } from "lucide-react"; // Import Loader2 icon from lucide-react
 
 export default function HomePage() {
   const [showResponse, setShowResponse] = useState(false);
@@ -19,6 +20,8 @@ export default function HomePage() {
   const [text, setText] = useState(true);
 
   const [user, setUser] = useState(auth.currentUser);
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [signInError, setSignInError] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -30,21 +33,33 @@ export default function HomePage() {
 
     return () => unsubscribe();
   }, []);
+
   let defaultName = "";
-  // const Check = !(user?.displayName === null) : defaultName
   const image = user?.photoURL || local;
   const robotText = `Hi ${!(user?.displayName === null)}, Yes! I found a great one nearby. Check it out and book now.`;
-  // Function to simulate user typing
+
   useEffect(() => {
     const timer = setTimeout(() => {
       if (!showResponse) {
         setShowResponse(true);
         setText(false);
       }
-    }, 9000); // Adjust this delay as needed
+    }, 9000);
 
     return () => clearTimeout(timer);
   }, [showResponse]);
+
+  const handleSignIn = async () => {
+    setIsSigningIn(true);
+    setSignInError(null);
+    try {
+      await SignIn();
+    } catch (error) {
+      setSignInError("Sign in failed. Please try again.");
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
 
   return (
     <section className="bg-[#131314]  w-full flex flex-col justify-center">
@@ -100,7 +115,6 @@ export default function HomePage() {
                   t.typeString(
                     `<p className="text-[#caccce] font-semibold"> Hey <b>Loca</b>, any plumber near <br /> me in Texas</p>`,
                   )
-                    // .pauseFor(2500)
                     .callFunction(() => {
                       setShowResponse(true);
                       setText(false);
@@ -124,16 +138,28 @@ export default function HomePage() {
           </p>
 
           {!user ? (
-            <Button
-              onClick={SignIn}
-              className="bg-blue-400 rounded-full p-6 hover:bg-blue-300"
-            >
-              SignIn{" "}
-            </Button>
+            <div>
+              <Button
+                onClick={handleSignIn}
+                className="bg-blue-400 rounded-full p-6 hover:bg-blue-300"
+                disabled={isSigningIn}
+              >
+                {isSigningIn ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing In...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
+              </Button>
+              {signInError && (
+                <p className="text-red-500 mt-2 text-sm">{signInError}</p>
+              )}
+            </div>
           ) : (
             <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300">
-              {" "}
-              <Link href="/chat">Chat</Link>{" "}
+              <Link href="/chat">Chat</Link>
             </Button>
           )}
         </div>
@@ -189,7 +215,6 @@ export default function HomePage() {
                   t.typeString(
                     `<p className="text-[#caccce] font-semibold"> Hey <b>Loca</b>, any plumber near <br /> me in Texas</p>`,
                   )
-                    // .pauseFor(2500)
                     .callFunction(() => {
                       setShowResponse(true);
                       setText(false);

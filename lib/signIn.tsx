@@ -28,7 +28,6 @@ const signIn = async () => {
           name: user.displayName,
           email: user.email,
           photoURL: user.photoURL,
-          // Add any other fields you want to store
         },
         { merge: true },
       );
@@ -39,7 +38,7 @@ const signIn = async () => {
       });
 
       window.localStorage.setItem("user", JSON.stringify(user));
-      toast.success("SignIn successful");
+      toast.success("SignIn successful! redirecting...");
       window.location.href = "/chat";
     } else {
       throw new Error("Failed to create session");
@@ -47,6 +46,7 @@ const signIn = async () => {
   } catch (error) {
     console.error(error);
     toast.error("SignIn failed");
+    throw error; // Re-throw the error so it can be caught in the HomePage component
   }
 };
 

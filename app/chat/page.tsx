@@ -69,14 +69,14 @@ export default function Chat() {
   // @ts-ignore
   const image = user?.photoURL as string;
   return (
-    <main className=" flex  bg-black h-screen overflow-hidden">
+    <main className=" flex  bg-black h-[100vh] ">
       <FirstVisitPopup />
       <div className=" hidden lg:block">
         <Sidebar />
       </div>
       <div className=" bg-[#1212] min-h-[100vh] pb-[15vh] relative flex-1 ">
         <div className="flex flex-col max-h-[830px] overflow-y-auto scroll-m-1">
-          <div className="sticky bg-fixed z-10 top-0 w-full shadow-2xl bg-black">
+          <div className="sticky  z-10 top-0 w-full shadow-2xl bg-black">
             <nav className="flex justify-between  p-4 ">
               <span
                 className="text-[#caccce] font-medium text-3xl cursor-pointer"

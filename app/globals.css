@@ -74,9 +74,10 @@
     @apply border-border box-border p-0 m-0;
   }
   body {
-    @apply bg-background text-foreground p-0 m-0 bg-black;
+    @apply text-foreground p-0 m-0 bg-black;
   }
 }
+
 
 @keyframes fadeIn {
   from {

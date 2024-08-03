@@ -33,13 +33,11 @@ type ChatPageProps = {
 
 interface ChatInboxProps {
   locationError: string | null;
-  manualLocation: string;
-  textareaRef: React.RefObject<HTMLTextAreaElement>;
-  userMessage: string;
-  handleInput: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   isProcessing: boolean;
+  handleInput: (e: ChangeEvent<HTMLTextAreaElement>) => void;
+  textareaRef: RefObject<HTMLTextAreaElement>;
+  userMessage: string;
   handleSendMessage: () => Promise<void>;
-  setManualLocation: React.Dispatch<React.SetStateAction<string>>;
 }
 
 interface Location {
