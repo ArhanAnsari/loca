@@ -227,17 +227,16 @@ const Main: React.FC = () => {
         ) : (
         
                conversation.map((message, index) => (
-                <div >
-            <ChatPage
-              key={index}
-              message={message}
-              index={index}
-              image={image}
-              logo={Logo}
-              isLoading={isLoading}
-              conversationEndRef={conversationEndRef}
-            />
-                 <div ref={conversationEndRef} />
+                <div key={index}> 
+                <ChatPage
+                  message={message}
+                  index={index}
+                  image={image}
+                  logo={Logo}
+                  isLoading={isLoading}
+                  conversationEndRef={conversationEndRef}
+                />
+                <div ref={conversationEndRef} />
               </div>
           ))
         
