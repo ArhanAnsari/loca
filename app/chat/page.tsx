@@ -87,7 +87,7 @@ export default function Chat() {
   const image = user?.photoURL as string;
 
   return (
-    <main className="flex h-screen bg-black overflow-hidden">
+    <main className="flex h-screen bg-[#131314] overflow-hidden">
       <FirstVisitPopup />
       <div className="hidden lg:block">
         <Sidebar />
@@ -119,7 +119,7 @@ export default function Chat() {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed inset-y-0 left-0 w-64 bg-gray-900 z-50 lg:hidden"
+            className="fixed inset-y-0 left-0 w-64 bg-[#1e1f20] z-50 lg:hidden"
           >
             <button
               className="absolute top-4 right-4 text-white"

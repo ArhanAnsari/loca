@@ -21,7 +21,7 @@ export const ChatInbox: React.FC<ChatInboxProps> = ({
           value={userMessage}
           onChange={handleInput}
           onKeyPress={(e) => e.key === "Enter" && !isProcessing && handleSendMessage()}
-          className="flex-1 bg-gray-800 text-white rounded-full px-4 py-2 outline-none resize-none"
+          className="flex-1 bg-[#1e1f20] text-white rounded-full px-4 py-2 outline-none resize-none"
           placeholder={isProcessing ? "Processing..." : "Looking for local service provider?"}
           disabled={isProcessing}
           rows={1}

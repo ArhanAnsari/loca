@@ -12,7 +12,8 @@ import { SignIn } from "@/lib/signIn";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
-import { Loader2 } from "lucide-react"; // Import Loader2 icon from lucide-react
+import { Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function HomePage() {
   const [showResponse, setShowResponse] = useState(false);
@@ -61,12 +62,39 @@ export default function HomePage() {
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1
+    }
+  };
+
   return (
-    <section className="bg-[#131314]  w-full flex flex-col justify-center">
+    <motion.section
+      className="bg-[#131314] w-full flex flex-col justify-center"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       <Navbar />
-      <header className="p-5 lg:p-5 lg:p-auto flex flex-col lg:flex-row justify-around items-center  h-[55rem] ">
-        <div className="relative lg:hidden block bg-[#34343677] w-full max-w-[30rem] h-[21rem]">
-          <div className=" p-4 rounded-lg">
+      <motion.header className="p-5 lg:p-5 lg:p-auto flex flex-col lg:flex-row justify-around items-center h-[55rem]" variants={itemVariants}>
+        <motion.div
+          className="relative lg:hidden block bg-[#34343677] w-full max-w-[30rem] h-[21rem]"
+          whileHover={{ scale: 1.05 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <div className="p-4 rounded-lg">
             <div className="flex gap-2">
               <Image
                 src={Logo}
@@ -77,13 +105,20 @@ export default function HomePage() {
               />
 
               <div className="space-y-4">
-                {!showResponse && text && (
-                  <div className="mt-32 ml-10">
-                    <h1 className="animate-pulse bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-red-600 text-6xl">
-                      Loca AI
-                    </h1>
-                  </div>
-                )}
+                <AnimatePresence>
+                  {!showResponse && text && (
+                    <motion.div
+                      className="mt-32 ml-10"
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                    >
+                      <h1 className="animate-pulse bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-red-600 text-6xl">
+                        Loca AI
+                      </h1>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 {showResponse && (
                   <div className="text-[#caccce]">
                     <Typewriter
@@ -97,11 +132,18 @@ export default function HomePage() {
                     />
                   </div>
                 )}
-                {showCard && <CardComponent />}
+                <AnimatePresence>
+                  {showCard && <CardComponent />}
+                </AnimatePresence>
               </div>
             </div>
           </div>
-          <div className="flex gap-2 p-6 items-center absolute -bottom-14 right-0 bg-[#131314] rounded-lg">
+          <motion.div
+            className="flex gap-2 p-6 items-center absolute -bottom-14 right-0 bg-[#131314] rounded-lg"
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 120 }}
+          >
             <Image
               src={user ? image : User}
               alt="Loca logo"
@@ -123,22 +165,42 @@ export default function HomePage() {
                 }}
               />
             </div>
-          </div>
-        </div>
-        <div className="space-y-6 ">
-          <h1 className=" animate-pulse bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-red-600 text-8xl lg:text-9xl  ">
+          </motion.div>
+        </motion.div>
+        <motion.div className="space-y-6" variants={itemVariants}>
+          <motion.h1
+            className="bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-red-600 text-8xl lg:text-9xl"
+            animate={{
+              scale: [1, 1.1, 1],
+              transition: { repeat: Infinity, duration: 2 }
+            }}
+          >
             Loca
-          </h1>
-          <span className="text-gray-300 font-black text-3xl lg:text-3xl">
+          </motion.h1>
+          <motion.span
+            className="text-gray-300 font-black text-3xl lg:text-3xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
             Instantly connect with <br /> Local Expert
-          </span>
-          <p className="text-sm text-white">
+          </motion.span>
+          <motion.p
+            className="text-sm text-white"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+          >
             Chat to start finding local service providers like plumber,
             Furniture etc.{" "}
-          </p>
+          </motion.p>
 
           {!user ? (
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9 }}
+            >
               <Button
                 onClick={handleSignIn}
                 className="bg-blue-400 rounded-full p-6 hover:bg-blue-300"
@@ -156,15 +218,25 @@ export default function HomePage() {
               {signInError && (
                 <p className="text-red-500 mt-2 text-sm">{signInError}</p>
               )}
-            </div>
+            </motion.div>
           ) : (
-            <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300">
-              <Link href="/chat">Chat</Link>
-            </Button>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9 }}
+            >
+              <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300">
+                <Link href="/chat">Chat</Link>
+              </Button>
+            </motion.div>
           )}
-        </div>
-        <div className="relative lg:block hidden bg-[#34343677] w-full max-w-[30rem] h-80">
-          <div className=" p-4 rounded-lg">
+        </motion.div>
+        <motion.div
+        className="relative lg:block hidden bg-[#34343677] w-full max-w-[30rem] h-80"
+          whileHover={{ scale: 1.05 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <div className="p-4 rounded-lg">
             <div className="flex gap-2">
               <Image
                 src={Logo}
@@ -175,20 +247,25 @@ export default function HomePage() {
               />
 
               <div className="space-y-4">
-                {!showResponse && text && (
-                  <div className="mt-32 ml-20">
-                    <h1 className="animate-pulse bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-red-600 text-6xl">
-                      Loca AI
-                    </h1>
-                  </div>
-                )}
+                <AnimatePresence>
+                  {!showResponse && text && (
+                    <motion.div
+                      className="mt-32 ml-10"
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                    >
+                      <h1 className="animate-pulse bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-red-600 text-6xl">
+                        Loca AI
+                      </h1>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 {showResponse && (
                   <div className="text-[#caccce]">
                     <Typewriter
                       onInit={(t) => {
-                        t.typeString(
-                          "Yes! I found a great one nearby. Check it out and book now.",
-                        )
+                        t.typeString(robotText)
                           .callFunction(() => {
                             setShowCard(true);
                           })
@@ -197,13 +274,20 @@ export default function HomePage() {
                     />
                   </div>
                 )}
-                {showCard && <CardComponent />}
+                <AnimatePresence>
+                  {showCard && <CardComponent />}
+                </AnimatePresence>
               </div>
             </div>
           </div>
-          <div className="flex gap-2 p-6 items-center absolute -bottom-14 right-0 bg-[#131314] rounded-lg">
+          <motion.div
+            className="flex gap-2 p-6 items-center absolute -bottom-14 right-0 bg-[#131314] rounded-lg"
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 120 }}
+          >
             <Image
-              src={User}
+              src={user ? image : User}
               alt="Loca logo"
               width={50}
               height={50}
@@ -223,40 +307,61 @@ export default function HomePage() {
                 }}
               />
             </div>
-          </div>
-        </div>
-      </header>
+          </motion.div>
+        </motion.div>
+      </motion.header>
       <Footer />
-    </section>
+    </motion.section>
   );
 }
 
 export const CardComponent = () => {
   return (
-    <>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+    >
       <ul className="border-[2px] border-[#caccce] border-dotted p-2 space-y-2">
-        <li className="text-white space-x-2">
+        <motion.li
+          className="text-white space-x-2"
+          whileHover={{ scale: 1.05, originX: 0 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
           <span className="text-primary-foreground font-semibold">
             Plumber Name:
           </span>{" "}
           ABC plumbing
-        </li>
-        <li className="text-white">
+        </motion.li>
+        <motion.li
+          className="text-white"
+          whileHover={{ scale: 1.05, originX: 0 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
           <span className="text-primary-foreground font-semibold">
             Address:
           </span>{" "}
           123 Main St, Texas
-        </li>
-        <li className="text-white">
+        </motion.li>
+        <motion.li
+          className="text-white"
+          whileHover={{ scale: 1.05, originX: 0 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
           <span className="text-primary-foreground font-semibold">
             Contact:
           </span>{" "}
           (123) 456-789
-        </li>
+        </motion.li>
       </ul>
-      <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300">
-        Book Now{" "}
-      </Button>
-    </>
+      <motion.div
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+      >
+        <Button className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 mt-2">
+          Book Now{" "}
+        </Button>
+      </motion.div>
+    </motion.div>
   );
 };
