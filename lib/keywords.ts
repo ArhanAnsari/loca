@@ -2,8 +2,6 @@ export const keyword = [
   "plumber",
   "nearby",
   "downtown",
-  "near me",
-  "any",
   "electrician",
   "mechanic",
   "restaurant",
