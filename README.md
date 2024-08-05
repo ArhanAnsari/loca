@@ -1,5 +1,4 @@
-
-###Loca: Find Local Services Fast
+Loca: Find Local Services Fast
 
 Welcome to Loca, your go-to solution for instantly connecting with local experts. Whether you need a plumber, electrician, or any other service provider, Loca is here to help you find the best professionals near you in no time.
 
@@ -30,7 +29,7 @@ Installation
 
 	1.	Clone the repository:
 
-git clone https://github.com/fit-create-devben/loca.git
+git clone https://github.com/git-create-devben/loca.git
 
 
 	2.	Navigate to the project directory:
@@ -61,7 +60,7 @@ npm start
 
 	2.	Open your browser and go to http://localhost:3000 to see Loca in action.
 
-##Usage
+Usage
 
 When you open Loca, you’ll be greeted with a friendly welcome message:
 
