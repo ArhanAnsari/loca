@@ -1,16 +1,16 @@
 
-##Loca: Find Local Services Fast
+###Loca: Find Local Services Fast
 
 Welcome to Loca, your go-to solution for instantly connecting with local experts. Whether you need a plumber, electrician, or any other service provider, Loca is here to help you find the best professionals near you in no time.
 
-##Features
+Features
 
 	•	Instant Service Discovery: Quickly find local services based on your location.
 	•	User-Friendly Interaction: Simple and intuitive interface for seamless user experience.
 	•	Real-time Updates: Get real-time information on available service providers.
 	•	Enhanced with Google Places API: Leveraging the power of Google Places API for accurate and comprehensive local service listings.
 
-##Demo
+Demo
 
 Here’s a quick demo of how Loca works:
 
@@ -21,7 +21,7 @@ Loca: “Yes! I found a great one nearby. Check it out and book now!”
 
 To get started with Loca, follow these steps:
 
-#Prerequisites
+Prerequisites
 
 	•	Node.js and npm installed on your machine.
 	•	A Google Places API key.
@@ -30,7 +30,7 @@ Installation
 
 	1.	Clone the repository:
 
-git clone https://github.com/yourusername/loca.git
+git clone https://github.com/fit-create-devben/loca.git
 
 
 	2.	Navigate to the project directory:
@@ -52,7 +52,7 @@ REACT_APP_GOOGLE_PLACES_API_KEY=your_api_key_here
 
 
 
-#Running the Application
+Running the Application
 
 	1.	Start the development server:
 
@@ -90,4 +90,4 @@ Acknowledgements
 
 ##Contact
 
-If you have any questions or suggestions, feel free to reach out to us at your-email@example.com.
+If you have any questions or suggestions, feel free to reach out to us at devbenofficial@gnail.com or benlad636@gmail.con.
