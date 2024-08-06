@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getLocalServices } from "@/lib/getLocationServices";
-import { keyword } from "@/lib/keywords";
+
 import { faqs } from "@/app/faq/data";
 import { adminAuth, admindb } from "@/lib/firebaseAdmin";
+import { extractServiceKeywords } from "@/lib/extractServiceKeywords";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
@@ -37,17 +38,17 @@ export async function POST(req: NextRequest) {
       try {
         const serviceKeywords = extractServiceKeywords(userMessage);
         let services = [];
-        if (serviceKeywords && latitude && longitude) {
+        if (serviceKeywords) {
           services = await getLocalServices(serviceKeywords, latitude, longitude);
           await writeChunk({ type: "services", data: services });
         }
-
+    
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-
+    
         // Construct the conversation history
         let conversationContext = conversationHistory ? conversationHistory.join("\n") : "";
         conversationContext += `\nUser: ${userMessage}\n`;
-
+    
         const prompt = `You are Loca, a local AI service finder. You're talking to ${userName}. 
         Here is some important information about you (Loca) in the form of FAQs:
         ${JSON.stringify(faqs)}
@@ -56,8 +57,10 @@ export async function POST(req: NextRequest) {
         ${conversationContext}
         
         ${services.length > 0 
-          ? `Here are some available services: ${JSON.stringify(services)}. Provide a helpful response based on this information, highlighting the best options for ${userName}.`
-          : `Provide a response about "${userMessage}" for ${userName}, keeping in mind the conversation context. If they are asking about local services and you don't have location data, suggest how they might find them or ask them to provide their location.`
+          ? `Here are some available services related to "${serviceKeywords}": ${JSON.stringify(services)}. Provide a helpful response based on this information, highlighting the best options for ${userName}.`
+          : serviceKeywords
+            ? `The user asked about "${serviceKeywords}", but I couldn't find any services. Please provide general information or suggestions about this type of service. and let them know mispelled may occur for not showing services if keyword doesn't match the keyword in out keyword database only say this if you think ${userName} is looking for specific service provider`
+            : `Provide a response about "${userMessage}" for ${userName}, keeping in mind the conversation context. If they are asking about local services and you don't have location data, suggest how they might find them tell them to make sure they're location is turn on in settings of their phone or laptop and tell thwm you can only provide services provider near them because that's your unique  and let them know mispelled may occur for not showing services if keyword doesn't match the keyword in out keyword database only say this if you think ${userName} is looking for specific service provider.`
         }
         
         Remember the context of the conversation and respond appropriately to follow-up questions or comments.`;
@@ -93,20 +96,5 @@ export async function POST(req: NextRequest) {
 }
 
 // Function to extract service keywords from the input string
-function extractServiceKeywords(input: string): string | null {
-  // Import keywords from @lib/keywords
-  const lowercaseInput = input.toLowerCase();
-  const words = lowercaseInput.split(/\s+/);
 
-  for (const word of words) {
-    if (keyword.includes(word)) {
-      const nearIndex = words.indexOf("near");
-      if (nearIndex !== -1 && nearIndex > words.indexOf(word)) {
-        return words.slice(words.indexOf(word), nearIndex + 2).join(" ");
-      }
-      return `${word} near me`;
-    }
-  }
 
-  return null;
-}

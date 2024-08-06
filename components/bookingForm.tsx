@@ -55,7 +55,7 @@ export function BookingForm() {
           ...formData,
           createdAt: new Date(),
         });
-        alert("Submitted successfully, hold on while we process your booking");
+        alert("Thanks for using book with loca demo this feature will be available soon");
         console.log("Document written with ID: ", docRef.id);
         router.push("/chat");
         setIsOpen(false);
@@ -73,7 +73,7 @@ export function BookingForm() {
         onClick={() => setIsOpen(true)}
         className="bg-blue-400 rounded-full p-6 hover:bg-blue-300 text-black border-none outline-none mt-8 w-full"
       >
-        Book by Loca
+        Book by Loca(demo)
       </button>
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">

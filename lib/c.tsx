@@ -1,6 +1,9 @@
+// Backup code for gemini incase i face a bug 
+
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getLocalServices } from "@/lib/getLocationServices";
+
 
 function extractServiceQuery(input: string): string | null {
   // This is a simple implementation. You might want to use a more sophisticated NLP approach.

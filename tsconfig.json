@@ -30,6 +30,6 @@
     ".next/types/**/*.ts",
     "app/api/gemini/route.ts",
     "lib/c.tsx"
-  ],
+, "lib/extractServiceKeywords.ts"  ],
   "exclude": ["node_modules"]
 }
