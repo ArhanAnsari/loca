@@ -71,10 +71,15 @@
 
 @layer base {
   * {
-    @apply border-border box-border p-0 m-0;
+    @apply border-border;
   }
+
   body {
-    @apply text-foreground p-0 m-0 bg-black;
+    @apply bg-background text-foreground font-body;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
   }
 }
 

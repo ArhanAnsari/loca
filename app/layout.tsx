@@ -1,10 +1,21 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Manrope } from 'next/font/google'
+import { cn } from '@/lib/utils'
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import LocalMantineProvider from "@/provider/mantineProvider";
 
-const inter = Outfit({ subsets: ["latin"] });
+const fontHeading = Manrope({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-heading',
+})
+
+const fontBody = Manrope({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-body',
+})
 
 export const metadata: Metadata = {
   title: "Loca",
@@ -18,7 +29,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={cn(
+        'antialiased',
+        fontHeading.variable,
+        fontBody.variable
+      )} suppressHydrationWarning>
         <LocalMantineProvider>
           {children} <Toaster position="top-right" />
         </LocalMantineProvider>
